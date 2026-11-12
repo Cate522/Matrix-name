@@ -261,11 +261,11 @@
         }
         .date-pill {
             background: #161620;
-            border: 1px solid rgba(229, 169, 60, 0.3);
+            border: 1px solid rgba(229, 169, 60, 0.35);
             padding: 10px 6px;
             text-align: center;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 700;
             color: var(--accent-gold);
         }
@@ -338,7 +338,7 @@
                     <!-- Линия Денег и Отношений (внутренний скос) -->
                     <line x1="170" y1="265" x2="265" y2="170" stroke="#10b981" stroke-width="2" opacity="0.8"/>
 
-                    <!-- Угловые родовые узлы (4 диагональные вершины) -->
+                    <!-- Угловые родовые узлы -->
                     <circle cx="62" cy="62" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
                     <text id="svgTL" x="62" y="66" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
 
@@ -355,7 +355,7 @@
                     <circle cx="218" cy="218" r="13" fill="url(#nodeEmerald)" stroke="#fff" stroke-width="1.5"/>
                     <text id="svgMoney" x="218" y="222" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">0</text>
 
-                    <!-- Главные вершины: День (слева), Месяц (сверху), Год (справа), Кармический узел (снизу) -->
+                    <!-- Главные вершины: День, Месяц, Год, Хвост -->
                     <circle cx="18" cy="170" r="16" fill="url(#nodePurple)" stroke="#fff" stroke-width="1.5"/>
                     <text id="svgDay" x="18" y="175" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
 
@@ -368,7 +368,7 @@
                     <circle cx="170" cy="322" r="17" fill="url(#nodeCrimson)" stroke="#fda4af" stroke-width="2"/>
                     <text id="svgTail" x="170" y="327" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
 
-                    <!-- Центр Матрицы (Точка Комфорта) -->
+                    <!-- Центр Матрицы -->
                     <circle cx="170" cy="170" r="23" fill="url(#nodeGold)" stroke="#fff" stroke-width="2"/>
                     <text id="svgCenter" x="170" y="176" fill="#09090b" font-size="16" font-weight="900" text-anchor="middle">0</text>
                 </svg>
@@ -445,38 +445,46 @@
         </div>
     </div>
 
-    <!-- ВКЛАДКА 3: ИДЕАЛ -->
+    <!-- ВКЛАДКА 3: ИДЕАЛ (ТЕПЕРЬ С ВВОДОМ ДАТЫ И РАСЧЕТОМ) -->
     <div id="tab-ideal" class="tab-content">
         <h1 class="hero-title">Матрица Идеала</h1>
-        <p class="hero-desc">Узнай, какие арканы и психотипы партнеров создают с тобой максимальную финансовую и любовную синергию.</p>
+        <p class="hero-desc">Введи свою дату рождения, чтобы вычислить 15 дат партнеров с максимальной финансовой и любовной синергией.</p>
 
-        <div class="result-card emerald-border">
-            <span class="badge emerald">Открытые связки синергии</span>
-            <div class="result-arcana">Базовые архетипические союзы</div>
-            <div class="result-text">В юнгианском анализе притяжение возникает там, где партнер дополняет твою непроявленную энергию:</div>
-            <div class="date-grid">
-                <div class="date-pill">3 + 4 числа</div>
-                <div class="date-pill">1 + 2 числа</div>
-                <div class="date-pill">7 + 10 числа</div>
-            </div>
+        <div class="date-card">
+            <span class="input-label">Твоя дата рождения</span>
+            <input type="date" id="idealBirthDate" class="date-input">
+            <button class="calc-btn" onclick="calculateIdeal()">Найти идеальные даты</button>
         </div>
 
-        <div class="blur-container">
-            <div class="blurred-content">
+        <div id="idealDisplay" class="matrix-display">
+            <div class="result-card emerald-border">
+                <span class="badge emerald">Твой резонанс (Открыто 3 из 15)</span>
+                <div class="result-arcana" id="idealTitle">Твой комплементарный код</div>
+                <div class="result-text" id="idealDesc">В юнгианском анализе максимальное притяжение возникает с партнерами, чьи энергии дополняют твою матрицу:</div>
                 <div class="date-grid">
-                    <div class="date-pill">🔒 ** + **</div>
-                    <div class="date-pill">🔒 ** + **</div>
-                    <div class="date-pill">🔒 ** + **</div>
-                    <div class="date-pill">🔒 ** + **</div>
-                    <div class="date-pill">🔒 ** + **</div>
-                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill" id="idealPill1">3 число</div>
+                    <div class="date-pill" id="idealPill2">10 число</div>
+                    <div class="date-pill" id="idealPill3">19 число</div>
                 </div>
             </div>
-            <div class="lock-overlay">
-                <div class="lock-icon">🔒</div>
-                <div class="lock-title">12 связок заблокированы</div>
-                <div class="lock-desc">Открой полную таблицу из 15 идеальных архетипических союзов + протоколы финансов и отношений в едином Атласе.</div>
-                <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть все 15 союзов (390 ₽)</a>
+
+            <div class="blur-container">
+                <div class="blurred-content">
+                    <div class="date-grid">
+                        <div class="date-pill">🔒 ** число</div>
+                        <div class="date-pill">🔒 ** число</div>
+                        <div class="date-pill">🔒 ** число</div>
+                        <div class="date-pill">🔒 ** число</div>
+                        <div class="date-pill">🔒 ** число</div>
+                        <div class="date-pill">🔒 ** число</div>
+                    </div>
+                </div>
+                <div class="lock-overlay">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-title">12 дат заблокированы</div>
+                    <div class="lock-desc">Открой полную таблицу из 15 идеальных архетипических союзов + протоколы финансов и отношений в едином Атласе.</div>
+                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть все 15 союзов (390 ₽)</a>
+                </div>
             </div>
         </div>
     </div>
@@ -634,14 +642,12 @@
             const bottomArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
             const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana + bottomArcana);
 
-            // Вершины родового квадрата и финансовый узел
             const tlArcana = reduceTo22(dayArcana + monthArcana);
             const trArcana = reduceTo22(monthArcana + yearArcana);
             const brArcana = reduceTo22(yearArcana + bottomArcana);
             const blArcana = reduceTo22(bottomArcana + dayArcana);
             const moneyArcana = reduceTo22(yearArcana + bottomArcana + centerArcana);
 
-            // Заполняем SVG
             document.getElementById('svgDay').textContent = dayArcana;
             document.getElementById('svgMonth').textContent = monthArcana;
             document.getElementById('svgYear').textContent = yearArcana;
@@ -655,7 +661,6 @@
 
             document.getElementById('matrixVisual').style.display = 'block';
 
-            // Заполняем 3 бесплатных карточки
             const dayData = arcanaData[dayArcana];
             const monthData = arcanaData[monthArcana];
             const centerData = arcanaData[centerArcana];
@@ -669,7 +674,6 @@
             document.getElementById('centerArcanaName').textContent = centerData.name;
             document.getElementById('centerArcanaDesc').textContent = centerData.comfort;
 
-            // Персонализируем заголовок замка под рассчитанный узел пользователя
             document.getElementById('tailArcanaPreview').textContent = "Теневой узел: Аркан " + bottomArcana + " и канал денег " + moneyArcana;
             document.getElementById('lockNodeTitle').textContent = "Узел (Аркан " + bottomArcana + ") заблокирован";
 
@@ -697,6 +701,37 @@
             document.getElementById('pairUnionDesc').textContent = "В плюсе ваш союз дает: " + unionData.plus.toLowerCase();
 
             document.getElementById('pairDisplay').style.display = 'block';
+        }
+
+        function calculateIdeal() {
+            const val = document.getElementById('idealBirthDate').value;
+            if (!val) return;
+            const parts = val.split('-');
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+
+            const dayArcana = reduceTo22(d);
+            const monthArcana = reduceTo22(m);
+            const yearSum = String(y).split('').reduce((acc, c) => acc + parseInt(c, 10), 0);
+            const yearArcana = reduceTo22(yearSum);
+            const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
+
+            // Вычисляем 3 комплементарные даты для пользователя
+            const match1 = reduceTo22(centerArcana + 3);
+            const match2 = reduceTo22(dayArcana + 7);
+            const match3 = reduceTo22(monthArcana + 11);
+
+            const partnerArcana = arcanaData[match1];
+
+            document.getElementById('idealTitle').textContent = "Твой резонанс: " + partnerArcana.name;
+            document.getElementById('idealDesc').textContent = "Для твоей матрицы (Код " + dayArcana + ") максимальную синергию в деньгах и любви дают партнеры, рожденные в эти числа любого месяца:";
+
+            document.getElementById('idealPill1').textContent = match1 + " число";
+            document.getElementById('idealPill2').textContent = match2 + " число";
+            document.getElementById('idealPill3').textContent = match3 + " число";
+
+            document.getElementById('idealDisplay').style.display = 'block';
         }
     </script>
 </body>
