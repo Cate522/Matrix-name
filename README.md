@@ -1,1 +1,320 @@
-# Matrix-name
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Матрица Судьбы</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #09090e;
+      --card-bg: #13131c;
+      --card-border: #232336;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text-main); padding: 16px 14px 40px; overflow-x: hidden; }
+    .tabs-nav { display: flex; background: #171722; border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
+    .tab-btn { flex: 1; padding: 10px 4px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-muted); border-radius: 10px; border: none; background: transparent; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: #252538; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .hero-title { font-size: 24px; font-weight: 800; text-align: center; line-height: 1.25; margin-bottom: 8px; background: linear-gradient(135deg, #fff 40%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px; line-height: 1.4; }
+    .date-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 24px; }
+    .input-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent-purple); margin-bottom: 8px; display: block; }
+    .date-input { width: 100%; background: #1b1b28; border: 1px solid #2d2d44; border-radius: 12px; padding: 14px; color: #fff; font-size: 16px; font-weight: 600; outline: none; margin-bottom: 14px; }
+    .calc-btn { width: 100%; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); color: #fff; font-size: 16px; font-weight: 700; padding: 15px; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35); }
+    .matrix-display { display: none; }
+    .star-container { position: relative; width: 310px; height: 310px; margin: 10px auto 25px; }
+    svg.star-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.25)); }
+    .mode-switch { display: flex; background: #171722; border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
+    .switch-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
+    .switch-btn.active-plus { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; }
+    .switch-btn.active-minus { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+    .result-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 16px; line-height: 1.5; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+    .badge-plus { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .badge-minus { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .result-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+    .result-text { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
+    .blur-container { position: relative; overflow: hidden; border-radius: 14px; }
+    .blurred-content { filter: blur(5px); user-select: none; pointer-events: none; opacity: 0.6; }
+    .lock-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(19, 19, 28, 0.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+    .lock-icon { font-size: 32px; margin-bottom: 8px; }
+    .lock-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .lock-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
+    .pay-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 14px; font-weight: 700; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+    .pair-percent { font-size: 54px; font-weight: 900; text-align: center; background: linear-gradient(135deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
+    .date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .date-pill { background: #1c1c2b; padding: 10px 6px; text-align: center; border-radius: 10px; font-size: 13px; font-weight: 600; color: #cbd5e1; border: 1px solid var(--card-border); }
+    .date-pill.locked { background: #141420; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  </style>
+</head>
+<body>
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchMainTab('matrix')">&#10024; Матрица</button>
+    <button class="tab-btn" onclick="switchMainTab('pair')">&#10084;&#65039; Пара</button>
+    <button class="tab-btn" onclick="switchMainTab('ideal')">&#128269; Идеал</button>
+  </div>
+
+  <div id="tab-matrix" class="tab-content active">
+    <h1 class="hero-title">Твои деньги, любовь и призвание по одной дате</h1>
+    <p class="hero-desc">Матрица судьбы: расчет ключевых энергий, талантов и теневых блокировок капитала.</p>
+    <div class="date-card">
+      <span class="input-label">Дата рождения</span>
+      <input type="date" id="birthDate" class="date-input" value="2002-08-25">
+      <button class="calc-btn" onclick="calculateMatrix()">Рассчитать Матрицу</button>
+    </div>
+    <div id="matrixDisplay" class="matrix-display">
+      <div class="star-container">
+        <svg class="star-svg" viewBox="0 0 320 320">
+          <defs>
+            <radialGradient id="gradCenter" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fde047" />
+              <stop offset="100%" stop-color="#eab308" />
+            </radialGradient>
+          </defs>
+          <circle cx="160" cy="160" r="140" fill="none" stroke="#232336" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <polygon points="160,20 300,160 160,300 20,160" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.6"/>
+          <polygon points="61,61 259,61 259,259 61,259" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.6"/>
+          <line x1="20" y1="160" x2="300" y2="160" stroke="#475569" stroke-width="1.5"/>
+          <line x1="160" y1="20" x2="160" y2="300" stroke="#475569" stroke-width="1.5"/>
+          <line x1="61" y1="61" x2="259" y2="259" stroke="#475569" stroke-width="1.5"/>
+          <line x1="61" y1="259" x2="259" y2="61" stroke="#475569" stroke-width="1.5"/>
+          <circle cx="20" cy="160" r="16" fill="#a855f7"/>
+          <text id="nodeDay" x="20" y="165" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
+          <circle cx="160" cy="20" r="16" fill="#8b5cf6"/>
+          <text id="nodeMonth" x="160" y="25" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
+          <circle cx="300" cy="160" r="16" fill="#f43f5e"/>
+          <text id="nodeYear" x="300" y="165" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
+          <circle cx="160" cy="300" r="16" fill="#ef4444"/>
+          <text id="nodeKarma" x="160" y="305" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">19</text>
+          <circle cx="160" cy="160" r="20" fill="url(#gradCenter)"/>
+          <text id="nodeCenter" x="160" y="166" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">11</text>
+          <circle cx="215" cy="215" r="14" fill="#10b981"/>
+          <text id="nodeMoney" x="215" y="220" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
+        </svg>
+      </div>
+      <div class="mode-switch">
+        <button id="btnModePlus" class="switch-btn active-plus" onclick="toggleMode('plus')">&#10024; В плюсе</button>
+        <button id="btnModeMinus" class="switch-btn" onclick="toggleMode('minus')">&#127761; В минусе (Узлы)</button>
+      </div>
+      <div id="contentPlus">
+        <div class="result-card">
+          <span class="badge badge-plus">Визитная карточка</span>
+          <div class="result-title" id="plusTitle"></div>
+          <p class="result-text" id="plusDesc"></p>
+        </div>
+        <div class="result-card">
+          <span class="badge badge-plus">Точка комфорта души</span>
+          <div class="result-title" id="centerTitle"></div>
+          <p class="result-text">Колоссальный внутренний аккумулятор энергии. Направляйте силу в масштабирование проектов.</p>
+        </div>
+      </div>
+      <div id="contentMinus" style="display:none;">
+        <div class="result-card blur-container">
+          <div class="blurred-content">
+            <span class="badge badge-minus">Теневой узел утечки</span>
+            <div class="result-title">Блокировка денежного канала</div>
+            <p class="result-text">Ваш денежный поток заблокирован родовым узлом на 72%. Деньги приходят, но сгорают через непредвиденные траты.</p>
+          </div>
+          <div class="lock-overlay">
+            <div class="lock-icon">&#128274;</div>
+            <div class="lock-title">Теневой узел заблокирован</div>
+            <div class="lock-desc">Узнайте, почему деньги утекают сквозь пальцы, и получите протокол нейтрализации узла на 21 день.</div>
+            <a href="https://t.me/tribute/app?startapp=placeholder" target="_blank" class="pay-btn">Разблокировать протокол (390 ₽)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-pair" class="tab-content">
+    <h1 class="hero-title">Какая между вами химия?</h1>
+    <p class="hero-desc">Процент совместимости и скрытые причины ссор по двум датам.</p>
+    <div class="date-card">
+      <span class="input-label">Твоя дата</span>
+      <input type="date" id="pairDate1" class="date-input" value="2002-08-25">
+      <span class="input-label">Его / Её дата</span>
+      <input type="date" id="pairDate2" class="date-input" value="2001-05-14">
+      <button class="calc-btn" onclick="calculatePair()">Узнать совместимость</button>
+    </div>
+    <div id="pairDisplay" class="matrix-display">
+      <div class="result-card">
+        <div class="hero-desc">Общий уровень притяжения:</div>
+        <div class="pair-percent" id="pairPercent">83%</div>
+        <div class="result-title" style="text-align:center;">Кармический союз лидеров</div>
+      </div>
+      <div class="result-card blur-container">
+        <div class="blurred-content">
+          <div class="result-title">Главная точка разрыва пары</div>
+          <p class="result-text">Узел 16 аркана: ссоры вспыхивают внезапно из-за борьбы за контроль.</p>
+        </div>
+        <div class="lock-overlay">
+          <div class="lock-icon">&#128274;</div>
+          <div class="lock-title">Анализ ссор скрыт</div>
+          <div class="lock-desc">Полный разбор точек конфликта и инструкция по гармонизации союза.</div>
+          <a href="https://t.me/tribute/app?startapp=placeholder" target="_blank" class="pay-btn">Открыть разбор пары (390 ₽)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-ideal" class="tab-content">
+    <h1 class="hero-title">Твой человек родился в один из 15 дней</h1>
+    <p class="hero-desc">Алгоритм подбирает даты рождения, с которыми совпадение энергий максимальное.</p>
+    <div class="date-card">
+      <span class="input-label">Твоя дата рождения</span>
+      <input type="date" id="idealDate" class="date-input" value="2002-08-25">
+      <button class="calc-btn" onclick="calculateIdeal()">Найти идеальные даты</button>
+    </div>
+    <div id="idealDisplay" class="matrix-display">
+      <div class="result-card">
+        <div class="result-title">Топ-3 открытые даты с совпадением 95%+:</div>
+        <div class="date-grid">
+          <div class="date-pill">14 мая</div>
+          <div class="date-pill">22 октября</div>
+          <div class="date-pill">7 января</div>
+        </div>
+      </div>
+      <div class="result-card blur-container">
+        <div class="blurred-content">
+          <div class="result-title">Остальные 12 дат с идеальной химией:</div>
+          <div class="date-grid">
+            <div class="date-pill locked">&#128274; **.**.****</div>
+            <div class="date-pill locked">&#128274; **.**.****</div>
+            <div class="date-pill locked">&#128274; **.**.****</div>
+            <div class="date-pill locked">&#128274; **.**.****</div>
+            <div class="date-pill locked">&#128274; **.**.****</div>
+            <div class="date-pill locked">&#128274; **.**.****</div>
+          </div>
+        </div>
+        <div class="lock-overlay">
+          <div class="lock-icon">&#128274;</div>
+          <div class="lock-title">Список из 12 дат заблокирован</div>
+          <div class="lock-desc">Разблокируйте полный список дат с описанием психотипа вашего партнера.</div>
+          <a href="https://t.me/tribute/app?startapp=placeholder" target="_blank" class="pay-btn">Открыть все 15 дат (390 ₽)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+    function switchMainTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      if (tab === 'matrix') {
+        event.target.classList.add('active');
+        document.getElementById('tab-matrix').classList.add('active');
+      } else if (tab === 'pair') {
+        event.target.classList.add('active');
+        document.getElementById('tab-pair').classList.add('active');
+      } else if (tab === 'ideal') {
+        event.target.classList.add('active');
+        document.getElementById('tab-ideal').classList.add('active');
+      }
+    }
+    function reduceTo22(num) {
+      while (num > 22) {
+        let sum = 0;
+        String(num).split('').forEach(d => sum += parseInt(d));
+        num = sum;
+      }
+      return num === 0 ? 22 : num;
+    }
+
+    // Чистый юникод без кириллических символов и амперсандов:
+    const arcanaData = {
+      1: { name: "\u0410\u0440\u043a\u0430\u043d 1 \u2014 \u041c\u0430\u0433", desc: "\u041f\u0440\u0438\u0440\u043e\u0436\u0434\u0435\u043d\u043d\u044b\u0439 \u043b\u0438\u0434\u0435\u0440, \u0433\u0435\u043d\u0435\u0440\u0430\u0440\u0442\u043e\u0440 \u0438\u0434\u0435\u0439 \u0438 \u043d\u043e\u0434\u0430\u0442\u043e\u0440." },
+      2: { name: "\u0410\u0440\u043a\u0430\u043d 2 \u2014 \u0416\u0440\u0438\u0446\u0430", desc: "\u0421\u0438\u043b\u044c\u043d\u0430\u044f \u0438\u043d\u0442\u0443\u0438\u0446\u0438\u044f, \u044d\u043c\u043f\u0430\u0442\u0438\u044f \u0438 \u0441\u043a\u0440\u044b\u0442\u0430\u044f \u043c\u0443\u0434\u0440\u043e\u0441\u0442\u044c." },
+      3: { name: "\u0410\u0440\u043a\u0430\u043d 3 \u2014 \u0418\u043c\u043f\u0435\u0440\u0430\u0442\u0440\u0438\u0446\u0430", desc: "\u042d\u043d\u0435\u0440\u0433\u0438\u044f \u0438\u0437\u043e\u0431\u0438\u043b\u0438\u044f, \u043a\u0440\u0430\u0441\u043e\u0442\u044b, \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u0438 \u0441\u043e\u0437\u0438\u0434\u0430\u043d\u0438\u044f." },
+      4: { name: "\u0410\u0440\u043a\u0430\u043d 4 \u2014 \u0418\u043c\u043f\u0435\u0440\u0430\u0442\u043e\u0440", desc: "\u0412\u043b\u0430\u0441\u0442\u044c, \u0434\u0438\u0441\u0446\u0438\u043f\u043b\u0438\u043d\u0430, \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0438 \u0442\u0432\u0435\u0440\u0434\u0430\u044f \u043e\u043f\u043e\u0440\u0430." },
+      5: { name: "\u0410\u0440\u043a\u0430\u043d 5 \u2014 \u0418\u0435\u0440\u043e\u0444\u0430\u043d\u0442", desc: "\u041c\u0443\u0434\u0440\u044b\u0439 \u043d\u0430\u0441\u0442\u0430\u0432\u043d\u0438\u043a, \u0443\u0432\u0430\u0436\u0435\u043d\u0438\u0435 \u0442\u0440\u0430\u0434\u0438\u0446\u0438\u0439 \u0438 \u043f\u0440\u0430\u0432\u0438\u043b." },
+      6: { name: "\u0410\u0440\u043a\u0430\u043d 6 \u2014 \u0412\u043b\u044e\u0431\u043b\u0435\u043d\u043d\u044b\u0435", desc: "\u041e\u0431\u0430\u044f\u043d\u0438\u0435, \u043a\u043e\u043c\u043c\u0443\u043d\u0438\u043a\u0430\u0446\u0438\u0438 \u0438 \u043f\u0430\u0448\u0442\u043d\u0435\u0440\u0441\u043a\u0438\u0435 \u0441\u043e\u044e\u0437\u044b." },
+      7: { name: "\u0410\u0440\u043a\u0430\u043d 7 \u2014 \u041a\u043e\u043b\u0435\u0441\u043d\u0438\u0446\u0430", desc: "\u041b\u0438\u0434\u0435\u0440\u0441\u0442\u0432\u043e, \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c, \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u0435 \u043a \u043f\u043e\u0431\u0435\u0434\u0435. \u0414\u0435\u043d\u044c\u0433\u0438 \u043f\u0440\u0438\u0445\u043e\u0434\u044f\u0442 \u0447\u0435\u0440\u0435\u0437 \u043f\u0440\u0435\u043e\u0434\u043e\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u0435\u043f\u044f\u0442\u0441\u0442\u0432\u0438\u0439 \u0438 \u043c\u0430\u0441\u0448\u0442\u0430\u0431\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432." },
+      8: { name: "\u0410\u0440\u043a\u0430\u043d 8 \u2014 \u0421\u043f\u0440\u0430\u0432\u0435\u0434\u043b\u0438\u0432\u043e\u0441\u0442\u044c", desc: "\u0422\u043e\u0447\u043d\u043e\u0441\u0442\u044c, \u043a\u0430\u0440\u043c\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0431\u0430\u043b\u0430\u043d\u0441 \u0438 \u0447\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044c." },
+      9: { name: "\u0410\u0440\u043a\u0430\u043d 9 \u2014 \u041e\u0442\u0448\u0435\u043b\u044c\u043d\u0438\u043a", desc: "\u0413\u043b\u0443\u0431\u043e\u043a\u0430\u044f \u043c\u0443\u0434\u0440\u043e\u0441\u0442\u044c, \u0437\u043d\u0430\u043d\u0438\u044f \u0438 \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u044c." },
+      10: { name: "\u0410\u0440\u043a\u0430\u043d 10 \u2014 \u041a\u043e\u043b\u0435\u0441\u043e \u0424\u043e\u0440\u0442\u0443\u043d\u044b", desc: "\u0423\u0434\u0430\u0447\u0430, \u043f\u043e\u0442\u043e\u043a \u0438 \u043b\u0435\u0433\u043a\u0438\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438." },
+      11: { name: "\u0410\u0440\u043a\u0430\u043d 11 \u2014 \u0421\u0438\u043b\u0430", desc: "\u041c\u043e\u0449\u043d\u044b\u0439 \u044d\u043d\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0440\u0435\u0441\u0443\u0440\u0441." },
+      12: { name: "\u0410\u0440\u043a\u0430\u043d 12 \u2014 \u041f\u043e\u0432\u0435\u0448\u0435\u043d\u043d\u044b\u0439", desc: "\u041a\u0440\u0435\u0430\u0442\u0438\u0432\u043d\u043e\u0435 \u043d\u0435\u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u043e\u0435 \u0432\u0438\u0434\u0435\u043d\u0438\u0435." },
+      13: { name: "\u0410\u0440\u043a\u0430\u043d 13 \u2014 \u0422\u0440\u0430\u043d\u0441\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f", desc: "\u041f\u0435\u0448\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u0438 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435." },
+      14: { name: "\u0410\u0440\u043a\u0430\u043d 14 \u2014 \u0423\u043c\u0435\u0440\u0435\u043d\u043d\u043e\u0441\u0442\u044c", desc: "\u0413\u0430\u0440\u043c\u043e\u043d\u0438\u044f, \u0441\u043f\u043e\u043a\u043e\u0439\u0441\u0442\u0432\u0438\u0435 \u0438 \u0431\u0430\u043b\u0430\u043d\u0441." },
+      15: { name: "\u0410\u0440\u043a\u0430\u043d 15 \u2014 \u0414\u044c\u044f\u0432\u043e\u043b", desc: "\u0425\u0430\u0440\u0438\u0437\u043c\u0430 \u0438 \u0434\u0435\u043d\u0435\u0436\u043d\u044b\u0439 \u043c\u0430\u0433\u043d\u0435\u0442\u0438\u0437\u043c." },
+      16: { name: "\u0410\u0440\u043a\u0430\u043d 16 \u2014 \u0411\u0430\u0448\u043d\u044f", desc: "\u0414\u0443\u0445\u043e\u0432\u043d\u044b\u0439 \u043f\u0440\u043e\u0440\u044b\u0432 \u0447\u0435\u0440\u0435\u0437 \u043a\u0440\u0438\u0437\u0438\u0441\u044b." },
+      17: { name: "\u0410\u0440\u043a\u0430\u043d 17 \u2014 \u0417\u0432\u0435\u0437\u0434\u0430", desc: "\u0421\u043b\u0430\u0432\u0430, \u043f\u0443\u0431\u043b\u0438\u0447\u043d\u043e\u0441\u0442\u044c \u0438 \u043f\u0443\u0442\u0435\u0432\u043e\u0434\u043d\u044b\u0439 \u043c\u0430\u044f\u043a." },
+      18: { name: "\u0410\u0440\u043a\u0430\u043d 18 \u2014 \u041b\u0443\u043d\u0430", desc: "\u041f\u043e\u0434\u0441\u043e\u0437\u043d\u0430\u043d\u0438\u0435, \u0432\u043e\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435 \u0438 \u0438\u043d\u0442\u0443\u0438\u0446\u0438\u044f." },
+      19: { name: "\u0410\u0440\u043a\u0430\u043d 19 \u2014 \u0421\u043e\u043b\u043d\u0446\u0435", desc: "\u041f\u0440\u043e\u0446\u0432\u0435\u0442\u0430\u043d\u0438\u0435, \u0440\u0430\u0434\u043e\u0441\u0442\u044c, \u0431\u043e\u0433\u0430\u0442\u0441\u0442\u0432\u043e \u0438 \u0449\u0435\u0434\u0440\u043e\u0441\u0442\u044c." },
+      20: { name: "\u0410\u0440\u043a\u0430\u043d 20 \u2014 \u0421\u0443\u0434", desc: "\u0421\u0438\u043b\u0430 \u0440\u043e\u0434\u0430, \u043f\u0440\u043e\u0431\u0443\u0436\u0434\u0435\u043d\u0438\u0435 \u0441\u043a\u0440\u044b\u0442\u044b\u0445 \u0442\u0430\u043b\u0430\u043d\u0442\u043e\u0432." },
+      21: { name: "\u0410\u0440\u043a\u0430\u043d 21 \u2014 \u041c\u0438\u0440", desc: "\u0413\u043b\u043e\u0431\u0430\u043b\u044c\u043d\u043e\u0435 \u043c\u044b\u0448\u043b\u0435\u043d\u0438\u0435 \u0438 \u043c\u0430\u0441\u0448\u0442\u0430\u0431." },
+      22: { name: "\u0410\u0440\u043a\u0430\u043d 22 \u2014 \u0424\u0443\u0442", desc: "\u0410\u0431\u0441\u043e\u043b\u044e\u0442\u043d\u0430\u044f \u0441\u0432\u043e\u0431\u043e\u0434\u0430, \u0441\u043c\u0435\u043b\u043e\u0441\u0442\u044c \u0438 \u043b\u0435\u0433\u043a\u0438\u0439 \u0441\u0442\u0430\u0440\u0442." }
+    };
+
+    function calculateMatrix() {
+      const val = document.getElementById('birthDate').value;
+      if (!val) return;
+      const parts = val.split('-');
+      const y = parseInt(parts[0]);
+      const m = parseInt(parts[1]);
+      const d = parseInt(parts[2]);
+      const dayArcana = reduceTo22(d);
+      const monthArcana = reduceTo22(m);
+      const yearArcana = reduceTo22(String(y).split('').reduce((acc, c) => acc + parseInt(c), 0));
+      const karmaArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
+      const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana + karmaArcana);
+      const moneyArcana = reduceTo22(karmaArcana + centerArcana);
+
+      document.getElementById('nodeDay').textContent = dayArcana;
+      document.getElementById('nodeMonth').textContent = monthArcana;
+      document.getElementById('nodeYear').textContent = yearArcana;
+      document.getElementById('nodeKarma').textContent = karmaArcana;
+      document.getElementById('nodeCenter').textContent = centerArcana;
+      document.getElementById('nodeMoney').textContent = moneyArcana;
+
+      const dayData = arcanaData[dayArcana] || arcanaData[7];
+      document.getElementById('plusTitle').textContent = dayData.name;
+      document.getElementById('plusDesc').textContent = dayData.desc;
+      document.getElementById('centerTitle').textContent = '\u0426\u0435\u043d\u0442\u0440: \u0410\u0440\u043a\u0430\u043d ' + centerArcana;
+      document.getElementById('matrixDisplay').style.display = 'block';
+      toggleMode('plus');
+    }
+    function toggleMode(mode) {
+      const btnPlus = document.getElementById('btnModePlus');
+      const btnMinus = document.getElementById('btnModeMinus');
+      const cPlus = document.getElementById('contentPlus');
+      const cMinus = document.getElementById('contentMinus');
+      if (mode === 'plus') {
+        btnPlus.className = 'switch-btn active-plus';
+        btnMinus.className = 'switch-btn';
+        cPlus.style.display = 'block';
+        cMinus.style.display = 'none';
+      } else {
+        btnPlus.className = 'switch-btn';
+        btnMinus.className = 'switch-btn active-minus';
+        cPlus.style.display = 'none';
+        cMinus.style.display = 'block';
+      }
+    }
+    function calculatePair() {
+      const d1 = document.getElementById('pairDate1').value;
+      const d2 = document.getElementById('pairDate2').value;
+      if (!d1 || !d2) return;
+      let hash = 0;
+      (d1 + d2).split('').forEach(c => hash += c.charCodeAt(0));
+      const percent = 65 + (hash % 30);
+      document.getElementById('pairPercent').textContent = percent + '%';
+      document.getElementById('pairDisplay').style.display = 'block';
+    }
+    function calculateIdeal() {
+      document.getElementById('idealDisplay').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
