@@ -1,320 +1,703 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Матрица Судьбы</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --bg: #09090e;
-      --card-bg: #13131c;
-      --card-border: #232336;
-      --accent-purple: #8b5cf6;
-      --accent-pink: #ec4899;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text-main); padding: 16px 14px 40px; overflow-x: hidden; }
-    .tabs-nav { display: flex; background: #171722; border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
-    .tab-btn { flex: 1; padding: 10px 4px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-muted); border-radius: 10px; border: none; background: transparent; cursor: pointer; transition: all 0.2s; }
-    .tab-btn.active { background: #252538; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .hero-title { font-size: 24px; font-weight: 800; text-align: center; line-height: 1.25; margin-bottom: 8px; background: linear-gradient(135deg, #fff 40%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero-desc { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px; line-height: 1.4; }
-    .date-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 24px; }
-    .input-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent-purple); margin-bottom: 8px; display: block; }
-    .date-input { width: 100%; background: #1b1b28; border: 1px solid #2d2d44; border-radius: 12px; padding: 14px; color: #fff; font-size: 16px; font-weight: 600; outline: none; margin-bottom: 14px; }
-    .calc-btn { width: 100%; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); color: #fff; font-size: 16px; font-weight: 700; padding: 15px; border: none; border-radius: 14px; cursor: pointer; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35); }
-    .matrix-display { display: none; }
-    .star-container { position: relative; width: 310px; height: 310px; margin: 10px auto 25px; }
-    svg.star-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.25)); }
-    .mode-switch { display: flex; background: #171722; border-radius: 14px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
-    .switch-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; }
-    .switch-btn.active-plus { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; }
-    .switch-btn.active-minus { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
-    .result-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px; margin-bottom: 16px; line-height: 1.5; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
-    .badge-plus { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .badge-minus { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .result-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #fff; }
-    .result-text { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
-    .blur-container { position: relative; overflow: hidden; border-radius: 14px; }
-    .blurred-content { filter: blur(5px); user-select: none; pointer-events: none; opacity: 0.6; }
-    .lock-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(19, 19, 28, 0.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
-    .lock-icon { font-size: 32px; margin-bottom: 8px; }
-    .lock-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-    .lock-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
-    .pay-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 14px; font-weight: 700; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
-    .pair-percent { font-size: 54px; font-weight: 900; text-align: center; background: linear-gradient(135deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
-    .date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-    .date-pill { background: #1c1c2b; padding: 10px 6px; text-align: center; border-radius: 10px; font-size: 13px; font-weight: 600; color: #cbd5e1; border: 1px solid var(--card-border); }
-    .date-pill.locked { background: #141420; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 4px; }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Матрица Судьбы | Аура Код</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #08080c;
+            --card-bg: rgba(18, 18, 24, 0.85);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-purple: #9d4edd;
+            --accent-gold: #e5a93c;
+            --accent-emerald: #10b981;
+            --accent-crimson: #e11d48;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% 0%, #1e1136 0%, #08080c 65%);
+            color: var(--text-main);
+            padding: 16px 14px 48px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Навигация */
+        .tabs-nav {
+            display: flex;
+            background: rgba(12, 12, 16, 0.8);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(229, 169, 60, 0.2));
+            color: var(--accent-gold);
+            border: 1px solid rgba(229, 169, 60, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .tab-content { display: none; animation: fadeIn 0.35s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Заголовки */
+        .hero-title {
+            font-size: 26px;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff 0%, #e5a93c 50%, #9d4edd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.45;
+        }
+
+        /* Карточка ввода */
+        .date-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .input-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .date-input {
+            width: 100%;
+            background: #121218;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 14px;
+            outline: none;
+            transition: 0.25s;
+        }
+        .date-input:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 12px rgba(229, 169, 60, 0.25);
+        }
+        .calc-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
+            transition: transform 0.15s ease;
+        }
+        .calc-btn:active { transform: scale(0.98); }
+
+        /* Сложная геометрия Матрицы */
+        .matrix-visual {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1;
+            margin: 0 auto 24px;
+            display: none;
+        }
+        .matrix-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(157, 78, 221, 0.2));
+        }
+
+        /* Карточки результатов */
+        .result-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--accent-purple);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .result-card.gold-border { border-left-color: var(--accent-gold); }
+        .result-card.emerald-border { border-left-color: var(--accent-emerald); }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            background: rgba(157, 78, 221, 0.2);
+            color: #d8b4fe;
+            border: 1px solid rgba(157, 78, 221, 0.35);
+        }
+        .badge.gold {
+            background: rgba(229, 169, 60, 0.18);
+            color: #fde047;
+            border-color: rgba(229, 169, 60, 0.4);
+        }
+        .badge.emerald {
+            background: rgba(16, 185, 129, 0.18);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+        .result-arcana { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .result-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+
+        /* Платный блок с замком */
+        .blur-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            margin-top: 18px;
+            border: 1px solid rgba(229, 169, 60, 0.4);
+            background: rgba(18, 18, 24, 0.9);
+            padding: 20px;
+            min-height: 230px;
+        }
+        .blurred-content { filter: blur(6px); user-select: none; pointer-events: none; opacity: 0.35; }
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(8, 8, 12, 0.55) 0%, rgba(8, 8, 12, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .lock-icon {
+            font-size: 34px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 12px var(--accent-gold));
+        }
+        .lock-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .lock-desc {
+            font-size: 12.5px;
+            color: #cbd5e1;
+            margin-bottom: 18px;
+            line-height: 1.45;
+            max-width: 280px;
+        }
+        .pay-btn {
+            background: linear-gradient(135deg, #e5a93c 0%, #b8860b 100%);
+            color: #000;
+            font-size: 14px;
+            font-weight: 900;
+            text-decoration: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 6px 20px rgba(229, 169, 60, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 260px;
+        }
+
+        /* Совместимость и даты */
+        .pair-percent {
+            font-size: 60px;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent-emerald), #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0;
+        }
+        .date-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .date-pill {
+            background: #161620;
+            border: 1px solid rgba(229, 169, 60, 0.3);
+            padding: 10px 6px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+        .matrix-display { display: none; margin-top: 10px; }
+    </style>
 </head>
 <body>
-  <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchMainTab('matrix')">&#10024; Матрица</button>
-    <button class="tab-btn" onclick="switchMainTab('pair')">&#10084;&#65039; Пара</button>
-    <button class="tab-btn" onclick="switchMainTab('ideal')">&#128269; Идеал</button>
-  </div>
 
-  <div id="tab-matrix" class="tab-content active">
-    <h1 class="hero-title">Твои деньги, любовь и призвание по одной дате</h1>
-    <p class="hero-desc">Матрица судьбы: расчет ключевых энергий, талантов и теневых блокировок капитала.</p>
-    <div class="date-card">
-      <span class="input-label">Дата рождения</span>
-      <input type="date" id="birthDate" class="date-input" value="2002-08-25">
-      <button class="calc-btn" onclick="calculateMatrix()">Рассчитать Матрицу</button>
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchMainTab('matrix', this)">✨ Матрица</button>
+        <button class="tab-btn" onclick="switchMainTab('pair', this)">❤️ Пара</button>
+        <button class="tab-btn" onclick="switchMainTab('ideal', this)">🔍 Идеал</button>
     </div>
-    <div id="matrixDisplay" class="matrix-display">
-      <div class="star-container">
-        <svg class="star-svg" viewBox="0 0 320 320">
-          <defs>
-            <radialGradient id="gradCenter" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#fde047" />
-              <stop offset="100%" stop-color="#eab308" />
-            </radialGradient>
-          </defs>
-          <circle cx="160" cy="160" r="140" fill="none" stroke="#232336" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <polygon points="160,20 300,160 160,300 20,160" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.6"/>
-          <polygon points="61,61 259,61 259,259 61,259" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.6"/>
-          <line x1="20" y1="160" x2="300" y2="160" stroke="#475569" stroke-width="1.5"/>
-          <line x1="160" y1="20" x2="160" y2="300" stroke="#475569" stroke-width="1.5"/>
-          <line x1="61" y1="61" x2="259" y2="259" stroke="#475569" stroke-width="1.5"/>
-          <line x1="61" y1="259" x2="259" y2="61" stroke="#475569" stroke-width="1.5"/>
-          <circle cx="20" cy="160" r="16" fill="#a855f7"/>
-          <text id="nodeDay" x="20" y="165" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
-          <circle cx="160" cy="20" r="16" fill="#8b5cf6"/>
-          <text id="nodeMonth" x="160" y="25" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
-          <circle cx="300" cy="160" r="16" fill="#f43f5e"/>
-          <text id="nodeYear" x="300" y="165" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
-          <circle cx="160" cy="300" r="16" fill="#ef4444"/>
-          <text id="nodeKarma" x="160" y="305" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">19</text>
-          <circle cx="160" cy="160" r="20" fill="url(#gradCenter)"/>
-          <text id="nodeCenter" x="160" y="166" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">11</text>
-          <circle cx="215" cy="215" r="14" fill="#10b981"/>
-          <text id="nodeMoney" x="215" y="220" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
-        </svg>
-      </div>
-      <div class="mode-switch">
-        <button id="btnModePlus" class="switch-btn active-plus" onclick="toggleMode('plus')">&#10024; В плюсе</button>
-        <button id="btnModeMinus" class="switch-btn" onclick="toggleMode('minus')">&#127761; В минусе (Узлы)</button>
-      </div>
-      <div id="contentPlus">
-        <div class="result-card">
-          <span class="badge badge-plus">Визитная карточка</span>
-          <div class="result-title" id="plusTitle"></div>
-          <p class="result-text" id="plusDesc"></p>
+
+    <!-- ВКЛАДКА 1: МАТРИЦА -->
+    <div id="tab-matrix" class="tab-content active">
+        <h1 class="hero-title">Матрица Судьбы</h1>
+        <p class="hero-desc">Рассчитай личную октаграмму, узнай врожденные таланты и сними блокировку с денежного канала.</p>
+
+        <div class="date-card">
+            <span class="input-label">Дата твоего рождения</span>
+            <input type="date" id="birthDate" class="date-input">
+            <button class="calc-btn" onclick="calculateMatrix()">Рассчитать Матрицу</button>
         </div>
-        <div class="result-card">
-          <span class="badge badge-plus">Точка комфорта души</span>
-          <div class="result-title" id="centerTitle"></div>
-          <p class="result-text">Колоссальный внутренний аккумулятор энергии. Направляйте силу в масштабирование проектов.</p>
+
+        <div id="matrixDisplay" class="matrix-display">
+            <!-- Сложная SVG геометрия Матрицы -->
+            <div class="matrix-visual" id="matrixVisual">
+                <svg class="matrix-svg" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#9d4edd" stop-opacity="0.85"/>
+                            <stop offset="100%" stop-color="#e5a93c" stop-opacity="0.85"/>
+                        </linearGradient>
+                        <linearGradient id="nodePurple" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#9d4edd"/>
+                            <stop offset="100%" stop-color="#4c1d95"/>
+                        </linearGradient>
+                        <linearGradient id="nodeGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fde047"/>
+                            <stop offset="100%" stop-color="#ca8a04"/>
+                        </linearGradient>
+                        <linearGradient id="nodeEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#34d399"/>
+                            <stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <linearGradient id="nodeCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fb7185"/>
+                            <stop offset="100%" stop-color="#be123c"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Внешние орбиты -->
+                    <circle cx="170" cy="170" r="156" fill="none" stroke="rgba(229,169,60,0.18)" stroke-width="1" stroke-dasharray="3 5"/>
+                    <circle cx="170" cy="170" r="138" fill="none" stroke="rgba(157,78,221,0.25)" stroke-width="1"/>
+                    <circle cx="170" cy="170" r="85" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="2 4"/>
+
+                    <!-- Родовой квадрат (прямой) -->
+                    <polygon points="62,62 278,62 278,278 62,278" fill="rgba(157,78,221,0.03)" stroke="url(#lineGrad)" stroke-width="1.5"/>
+
+                    <!-- Личностный квадрат (диагональный ромб) -->
+                    <polygon points="170,18 322,170 170,322 18,170" fill="rgba(229,169,60,0.03)" stroke="url(#lineGrad)" stroke-width="1.8"/>
+
+                    <!-- Осевые линии Неба, Земли и Рода -->
+                    <line x1="170" y1="18" x2="170" y2="322" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
+                    <line x1="18" y1="170" x2="322" y2="170" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
+                    <line x1="62" y1="62" x2="278" y2="278" stroke="rgba(157,78,221,0.35)" stroke-width="1.2" stroke-dasharray="4 4"/>
+                    <line x1="62" y1="278" x2="278" y2="62" stroke="rgba(157,78,221,0.35)" stroke-width="1.2" stroke-dasharray="4 4"/>
+
+                    <!-- Линия Денег и Отношений (внутренний скос) -->
+                    <line x1="170" y1="265" x2="265" y2="170" stroke="#10b981" stroke-width="2" opacity="0.8"/>
+
+                    <!-- Угловые родовые узлы (4 диагональные вершины) -->
+                    <circle cx="62" cy="62" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
+                    <text id="svgTL" x="62" y="66" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
+
+                    <circle cx="278" cy="62" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
+                    <text id="svgTR" x="278" y="66" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
+
+                    <circle cx="62" cy="278" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
+                    <text id="svgBL" x="62" y="282" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
+
+                    <circle cx="278" cy="278" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
+                    <text id="svgBR" x="278" y="282" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
+
+                    <!-- Узел Финансового Канала -->
+                    <circle cx="218" cy="218" r="13" fill="url(#nodeEmerald)" stroke="#fff" stroke-width="1.5"/>
+                    <text id="svgMoney" x="218" y="222" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">0</text>
+
+                    <!-- Главные вершины: День (слева), Месяц (сверху), Год (справа), Кармический узел (снизу) -->
+                    <circle cx="18" cy="170" r="16" fill="url(#nodePurple)" stroke="#fff" stroke-width="1.5"/>
+                    <text id="svgDay" x="18" y="175" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
+
+                    <circle cx="170" cy="18" r="16" fill="url(#nodePurple)" stroke="#fff" stroke-width="1.5"/>
+                    <text id="svgMonth" x="170" y="23" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
+
+                    <circle cx="322" cy="170" r="16" fill="url(#nodeCrimson)" stroke="#fff" stroke-width="1.5"/>
+                    <text id="svgYear" x="322" y="175" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
+
+                    <circle cx="170" cy="322" r="17" fill="url(#nodeCrimson)" stroke="#fda4af" stroke-width="2"/>
+                    <text id="svgTail" x="170" y="327" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
+
+                    <!-- Центр Матрицы (Точка Комфорта) -->
+                    <circle cx="170" cy="170" r="23" fill="url(#nodeGold)" stroke="#fff" stroke-width="2"/>
+                    <text id="svgCenter" x="170" y="176" fill="#09090b" font-size="16" font-weight="900" text-anchor="middle">0</text>
+                </svg>
+            </div>
+
+            <!-- БЕСПЛАТНЫЙ КОНТЕНТ: 3 РАЗВЕРНУТЫХ БЛОКА -->
+            <div class="result-card">
+                <span class="badge">1. Визитная карточка (День)</span>
+                <div class="result-arcana" id="dayArcanaName">Аркан</div>
+                <div class="result-text" id="dayArcanaDesc">Описание...</div>
+            </div>
+
+            <div class="result-card emerald-border">
+                <span class="badge emerald">2. Врожденный талант и ресурс (Месяц)</span>
+                <div class="result-arcana" id="monthArcanaName">Аркан</div>
+                <div class="result-text" id="monthArcanaDesc">Описание...</div>
+            </div>
+
+            <div class="result-card gold-border">
+                <span class="badge gold">3. Точка комфорта души (Центр)</span>
+                <div class="result-arcana" id="centerArcanaName">Аркан</div>
+                <div class="result-text" id="centerArcanaDesc">Описание...</div>
+            </div>
+
+            <!-- ПЛАТНЫЙ БЛОК (БЛЮР) -->
+            <div class="blur-container">
+                <div class="blurred-content">
+                    <div class="result-arcana" id="tailArcanaPreview">Кармический узел: Аркан 15</div>
+                    <div class="result-text">Скрытая вторичная выгода теневого узла блокирует финансовый рост и провоцирует кассовые разрывы. 3 действия-антидота для пробития потолка и 21-дневный микропротокол перепрошивки.</div>
+                </div>
+                <div class="lock-overlay">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-title" id="lockNodeTitle">Денежный узел скрыт</div>
+                    <div class="lock-desc">Забери расшифровку своего теневого блока, 3 действия-антидота и пошаговый протокол деактивации на 21 день.</div>
+                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Скачать Атлас (390 ₽)</a>
+                </div>
+            </div>
         </div>
-      </div>
-      <div id="contentMinus" style="display:none;">
-        <div class="result-card blur-container">
-          <div class="blurred-content">
-            <span class="badge badge-minus">Теневой узел утечки</span>
-            <div class="result-title">Блокировка денежного канала</div>
-            <p class="result-text">Ваш денежный поток заблокирован родовым узлом на 72%. Деньги приходят, но сгорают через непредвиденные траты.</p>
-          </div>
-          <div class="lock-overlay">
-            <div class="lock-icon">&#128274;</div>
-            <div class="lock-title">Теневой узел заблокирован</div>
-            <div class="lock-desc">Узнайте, почему деньги утекают сквозь пальцы, и получите протокол нейтрализации узла на 21 день.</div>
-            <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Разблокировать протокол (390 ₽)</a>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div id="tab-pair" class="tab-content">
-    <h1 class="hero-title">Какая между вами химия?</h1>
-    <p class="hero-desc">Процент совместимости и скрытые причины ссор по двум датам.</p>
-    <div class="date-card">
-      <span class="input-label">Твоя дата</span>
-      <input type="date" id="pairDate1" class="date-input" value="2002-08-25">
-      <span class="input-label">Его / Её дата</span>
-      <input type="date" id="pairDate2" class="date-input" value="2001-05-14">
-      <button class="calc-btn" onclick="calculatePair()">Узнать совместимость</button>
+    <!-- ВКЛАДКА 2: ПАРА -->
+    <div id="tab-pair" class="tab-content">
+        <h1 class="hero-title">Код Совместимости</h1>
+        <p class="hero-desc">Проверь кармическое притяжение и скрытые триггеры конфликтов по двум датам рождения.</p>
+
+        <div class="date-card">
+            <span class="input-label">Твоя дата рождения</span>
+            <input type="date" id="pairDate1" class="date-input">
+            <span class="input-label">Дата партнера</span>
+            <input type="date" id="pairDate2" class="date-input">
+            <button class="calc-btn" onclick="calculatePair()">Рассчитать совместимость</button>
+        </div>
+
+        <div id="pairDisplay" class="matrix-display">
+            <div class="result-card gold-border" style="text-align: center;">
+                <span class="badge gold">Индекс резонанса пары</span>
+                <div class="pair-percent" id="pairPercent">85%</div>
+                <div class="result-arcana" id="pairUnionTitle">Кармический союз лидеров</div>
+                <div class="result-text" id="pairUnionDesc">Ваши энергии создают мощное притяжение, но требуют осознанного распределения ролей.</div>
+            </div>
+
+            <div class="blur-container">
+                <div class="blurred-content">
+                    <div class="result-arcana">Главный триггер ссор в паре</div>
+                    <div class="result-text">В периоды стресса активируется защитный механизм. Точная фраза-пароль для мгновенного гашения конфликта и перевода напряжения в близость.</div>
+                </div>
+                <div class="lock-overlay">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-title">Точки разрыва скрыты</div>
+                    <div class="lock-desc">Узнай скрытую причину ваших ссор и получи готовые фразы-инструкции для гармонизации союза в полном Атласе.</div>
+                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть разбор пары (390 ₽)</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="pairDisplay" class="matrix-display">
-      <div class="result-card">
-        <div class="hero-desc">Общий уровень притяжения:</div>
-        <div class="pair-percent" id="pairPercent">83%</div>
-        <div class="result-title" style="text-align:center;">Кармический союз лидеров</div>
-      </div>
-      <div class="result-card blur-container">
-        <div class="blurred-content">
-          <div class="result-title">Главная точка разрыва пары</div>
-          <p class="result-text">Узел 16 аркана: ссоры вспыхивают внезапно из-за борьбы за контроль.</p>
+
+    <!-- ВКЛАДКА 3: ИДЕАЛ -->
+    <div id="tab-ideal" class="tab-content">
+        <h1 class="hero-title">Матрица Идеала</h1>
+        <p class="hero-desc">Узнай, какие арканы и психотипы партнеров создают с тобой максимальную финансовую и любовную синергию.</p>
+
+        <div class="result-card emerald-border">
+            <span class="badge emerald">Открытые связки синергии</span>
+            <div class="result-arcana">Базовые архетипические союзы</div>
+            <div class="result-text">В юнгианском анализе притяжение возникает там, где партнер дополняет твою непроявленную энергию:</div>
+            <div class="date-grid">
+                <div class="date-pill">3 + 4 числа</div>
+                <div class="date-pill">1 + 2 числа</div>
+                <div class="date-pill">7 + 10 числа</div>
+            </div>
         </div>
-        <div class="lock-overlay">
-          <div class="lock-icon">&#128274;</div>
-          <div class="lock-title">Анализ ссор скрыт</div>
-          <div class="lock-desc">Полный разбор точек конфликта и инструкция по гармонизации союза.</div>
-          <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть разбор пары (390 ₽)</a>
+
+        <div class="blur-container">
+            <div class="blurred-content">
+                <div class="date-grid">
+                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill">🔒 ** + **</div>
+                    <div class="date-pill">🔒 ** + **</div>
+                </div>
+            </div>
+            <div class="lock-overlay">
+                <div class="lock-icon">🔒</div>
+                <div class="lock-title">12 связок заблокированы</div>
+                <div class="lock-desc">Открой полную таблицу из 15 идеальных архетипических союзов + протоколы финансов и отношений в едином Атласе.</div>
+                <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть все 15 союзов (390 ₽)</a>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div id="tab-ideal" class="tab-content">
-    <h1 class="hero-title">Твой человек родился в один из 15 дней</h1>
-    <p class="hero-desc">Алгоритм подбирает даты рождения, с которыми совпадение энергий максимальное.</p>
-    <div class="date-card">
-      <span class="input-label">Твоя дата рождения</span>
-      <input type="date" id="idealDate" class="date-input" value="2002-08-25">
-      <button class="calc-btn" onclick="calculateIdeal()">Найти идеальные даты</button>
-    </div>
-    <div id="idealDisplay" class="matrix-display">
-      <div class="result-card">
-        <div class="result-title">Топ-3 открытые даты с совпадением 95%+:</div>
-        <div class="date-grid">
-          <div class="date-pill">14 мая</div>
-          <div class="date-pill">22 октября</div>
-          <div class="date-pill">7 января</div>
-        </div>
-      </div>
-      <div class="result-card blur-container">
-        <div class="blurred-content">
-          <div class="result-title">Остальные 12 дат с идеальной химией:</div>
-          <div class="date-grid">
-            <div class="date-pill locked">&#128274; **.**.****</div>
-            <div class="date-pill locked">&#128274; **.**.****</div>
-            <div class="date-pill locked">&#128274; **.**.****</div>
-            <div class="date-pill locked">&#128274; **.**.****</div>
-            <div class="date-pill locked">&#128274; **.**.****</div>
-            <div class="date-pill locked">&#128274; **.**.****</div>
-          </div>
-        </div>
-        <div class="lock-overlay">
-          <div class="lock-icon">&#128274;</div>
-          <div class="lock-title">Список из 12 дат заблокирован</div>
-          <div class="lock-desc">Разблокируйте полный список дат с описанием психотипа вашего партнера.</div>
-          <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть все 15 дат (390 ₽)</a>
-        </div>
-      </div>
-    </div>
-  </div>
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            try { window.Telegram.WebApp.setHeaderColor('#08080c'); } catch(e) {}
+        }
 
-  <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
-    function switchMainTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      if (tab === 'matrix') {
-        event.target.classList.add('active');
-        document.getElementById('tab-matrix').classList.add('active');
-      } else if (tab === 'pair') {
-        event.target.classList.add('active');
-        document.getElementById('tab-pair').classList.add('active');
-      } else if (tab === 'ideal') {
-        event.target.classList.add('active');
-        document.getElementById('tab-ideal').classList.add('active');
-      }
-    }
-    function reduceTo22(num) {
-      while (num > 22) {
-        let sum = 0;
-        String(num).split('').forEach(d => sum += parseInt(d));
-        num = sum;
-      }
-      return num === 0 ? 22 : num;
-    }
+        function switchMainTab(tab, btnEl) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btnEl.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
 
-    // Чистый юникод без кириллических символов и амперсандов:
-    const arcanaData = {
-      1: { name: "\u0410\u0440\u043a\u0430\u043d 1 \u2014 \u041c\u0430\u0433", desc: "\u041f\u0440\u0438\u0440\u043e\u0436\u0434\u0435\u043d\u043d\u044b\u0439 \u043b\u0438\u0434\u0435\u0440, \u0433\u0435\u043d\u0435\u0440\u0430\u0440\u0442\u043e\u0440 \u0438\u0434\u0435\u0439 \u0438 \u043d\u043e\u0434\u0430\u0442\u043e\u0440." },
-      2: { name: "\u0410\u0440\u043a\u0430\u043d 2 \u2014 \u0416\u0440\u0438\u0446\u0430", desc: "\u0421\u0438\u043b\u044c\u043d\u0430\u044f \u0438\u043d\u0442\u0443\u0438\u0446\u0438\u044f, \u044d\u043c\u043f\u0430\u0442\u0438\u044f \u0438 \u0441\u043a\u0440\u044b\u0442\u0430\u044f \u043c\u0443\u0434\u0440\u043e\u0441\u0442\u044c." },
-      3: { name: "\u0410\u0440\u043a\u0430\u043d 3 \u2014 \u0418\u043c\u043f\u0435\u0440\u0430\u0442\u0440\u0438\u0446\u0430", desc: "\u042d\u043d\u0435\u0440\u0433\u0438\u044f \u0438\u0437\u043e\u0431\u0438\u043b\u0438\u044f, \u043a\u0440\u0430\u0441\u043e\u0442\u044b, \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u0438 \u0441\u043e\u0437\u0438\u0434\u0430\u043d\u0438\u044f." },
-      4: { name: "\u0410\u0440\u043a\u0430\u043d 4 \u2014 \u0418\u043c\u043f\u0435\u0440\u0430\u0442\u043e\u0440", desc: "\u0412\u043b\u0430\u0441\u0442\u044c, \u0434\u0438\u0441\u0446\u0438\u043f\u043b\u0438\u043d\u0430, \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0438 \u0442\u0432\u0435\u0440\u0434\u0430\u044f \u043e\u043f\u043e\u0440\u0430." },
-      5: { name: "\u0410\u0440\u043a\u0430\u043d 5 \u2014 \u0418\u0435\u0440\u043e\u0444\u0430\u043d\u0442", desc: "\u041c\u0443\u0434\u0440\u044b\u0439 \u043d\u0430\u0441\u0442\u0430\u0432\u043d\u0438\u043a, \u0443\u0432\u0430\u0436\u0435\u043d\u0438\u0435 \u0442\u0440\u0430\u0434\u0438\u0446\u0438\u0439 \u0438 \u043f\u0440\u0430\u0432\u0438\u043b." },
-      6: { name: "\u0410\u0440\u043a\u0430\u043d 6 \u2014 \u0412\u043b\u044e\u0431\u043b\u0435\u043d\u043d\u044b\u0435", desc: "\u041e\u0431\u0430\u044f\u043d\u0438\u0435, \u043a\u043e\u043c\u043c\u0443\u043d\u0438\u043a\u0430\u0446\u0438\u0438 \u0438 \u043f\u0430\u0448\u0442\u043d\u0435\u0440\u0441\u043a\u0438\u0435 \u0441\u043e\u044e\u0437\u044b." },
-      7: { name: "\u0410\u0440\u043a\u0430\u043d 7 \u2014 \u041a\u043e\u043b\u0435\u0441\u043d\u0438\u0446\u0430", desc: "\u041b\u0438\u0434\u0435\u0440\u0441\u0442\u0432\u043e, \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c, \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u0435 \u043a \u043f\u043e\u0431\u0435\u0434\u0435. \u0414\u0435\u043d\u044c\u0433\u0438 \u043f\u0440\u0438\u0445\u043e\u0434\u044f\u0442 \u0447\u0435\u0440\u0435\u0437 \u043f\u0440\u0435\u043e\u0434\u043e\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u0435\u043f\u044f\u0442\u0441\u0442\u0432\u0438\u0439 \u0438 \u043c\u0430\u0441\u0448\u0442\u0430\u0431\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432." },
-      8: { name: "\u0410\u0440\u043a\u0430\u043d 8 \u2014 \u0421\u043f\u0440\u0430\u0432\u0435\u0434\u043b\u0438\u0432\u043e\u0441\u0442\u044c", desc: "\u0422\u043e\u0447\u043d\u043e\u0441\u0442\u044c, \u043a\u0430\u0440\u043c\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0431\u0430\u043b\u0430\u043d\u0441 \u0438 \u0447\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044c." },
-      9: { name: "\u0410\u0440\u043a\u0430\u043d 9 \u2014 \u041e\u0442\u0448\u0435\u043b\u044c\u043d\u0438\u043a", desc: "\u0413\u043b\u0443\u0431\u043e\u043a\u0430\u044f \u043c\u0443\u0434\u0440\u043e\u0441\u0442\u044c, \u0437\u043d\u0430\u043d\u0438\u044f \u0438 \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u044c." },
-      10: { name: "\u0410\u0440\u043a\u0430\u043d 10 \u2014 \u041a\u043e\u043b\u0435\u0441\u043e \u0424\u043e\u0440\u0442\u0443\u043d\u044b", desc: "\u0423\u0434\u0430\u0447\u0430, \u043f\u043e\u0442\u043e\u043a \u0438 \u043b\u0435\u0433\u043a\u0438\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438." },
-      11: { name: "\u0410\u0440\u043a\u0430\u043d 11 \u2014 \u0421\u0438\u043b\u0430", desc: "\u041c\u043e\u0449\u043d\u044b\u0439 \u044d\u043d\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0440\u0435\u0441\u0443\u0440\u0441." },
-      12: { name: "\u0410\u0440\u043a\u0430\u043d 12 \u2014 \u041f\u043e\u0432\u0435\u0448\u0435\u043d\u043d\u044b\u0439", desc: "\u041a\u0440\u0435\u0430\u0442\u0438\u0432\u043d\u043e\u0435 \u043d\u0435\u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043d\u043e\u0435 \u0432\u0438\u0434\u0435\u043d\u0438\u0435." },
-      13: { name: "\u0410\u0440\u043a\u0430\u043d 13 \u2014 \u0422\u0440\u0430\u043d\u0441\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f", desc: "\u041f\u0435\u0448\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u0438 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435." },
-      14: { name: "\u0410\u0440\u043a\u0430\u043d 14 \u2014 \u0423\u043c\u0435\u0440\u0435\u043d\u043d\u043e\u0441\u0442\u044c", desc: "\u0413\u0430\u0440\u043c\u043e\u043d\u0438\u044f, \u0441\u043f\u043e\u043a\u043e\u0439\u0441\u0442\u0432\u0438\u0435 \u0438 \u0431\u0430\u043b\u0430\u043d\u0441." },
-      15: { name: "\u0410\u0440\u043a\u0430\u043d 15 \u2014 \u0414\u044c\u044f\u0432\u043e\u043b", desc: "\u0425\u0430\u0440\u0438\u0437\u043c\u0430 \u0438 \u0434\u0435\u043d\u0435\u0436\u043d\u044b\u0439 \u043c\u0430\u0433\u043d\u0435\u0442\u0438\u0437\u043c." },
-      16: { name: "\u0410\u0440\u043a\u0430\u043d 16 \u2014 \u0411\u0430\u0448\u043d\u044f", desc: "\u0414\u0443\u0445\u043e\u0432\u043d\u044b\u0439 \u043f\u0440\u043e\u0440\u044b\u0432 \u0447\u0435\u0440\u0435\u0437 \u043a\u0440\u0438\u0437\u0438\u0441\u044b." },
-      17: { name: "\u0410\u0440\u043a\u0430\u043d 17 \u2014 \u0417\u0432\u0435\u0437\u0434\u0430", desc: "\u0421\u043b\u0430\u0432\u0430, \u043f\u0443\u0431\u043b\u0438\u0447\u043d\u043e\u0441\u0442\u044c \u0438 \u043f\u0443\u0442\u0435\u0432\u043e\u0434\u043d\u044b\u0439 \u043c\u0430\u044f\u043a." },
-      18: { name: "\u0410\u0440\u043a\u0430\u043d 18 \u2014 \u041b\u0443\u043d\u0430", desc: "\u041f\u043e\u0434\u0441\u043e\u0437\u043d\u0430\u043d\u0438\u0435, \u0432\u043e\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435 \u0438 \u0438\u043d\u0442\u0443\u0438\u0446\u0438\u044f." },
-      19: { name: "\u0410\u0440\u043a\u0430\u043d 19 \u2014 \u0421\u043e\u043b\u043d\u0446\u0435", desc: "\u041f\u0440\u043e\u0446\u0432\u0435\u0442\u0430\u043d\u0438\u0435, \u0440\u0430\u0434\u043e\u0441\u0442\u044c, \u0431\u043e\u0433\u0430\u0442\u0441\u0442\u0432\u043e \u0438 \u0449\u0435\u0434\u0440\u043e\u0441\u0442\u044c." },
-      20: { name: "\u0410\u0440\u043a\u0430\u043d 20 \u2014 \u0421\u0443\u0434", desc: "\u0421\u0438\u043b\u0430 \u0440\u043e\u0434\u0430, \u043f\u0440\u043e\u0431\u0443\u0436\u0434\u0435\u043d\u0438\u0435 \u0441\u043a\u0440\u044b\u0442\u044b\u0445 \u0442\u0430\u043b\u0430\u043d\u0442\u043e\u0432." },
-      21: { name: "\u0410\u0440\u043a\u0430\u043d 21 \u2014 \u041c\u0438\u0440", desc: "\u0413\u043b\u043e\u0431\u0430\u043b\u044c\u043d\u043e\u0435 \u043c\u044b\u0448\u043b\u0435\u043d\u0438\u0435 \u0438 \u043c\u0430\u0441\u0448\u0442\u0430\u0431." },
-      22: { name: "\u0410\u0440\u043a\u0430\u043d 22 \u2014 \u0424\u0443\u0442", desc: "\u0410\u0431\u0441\u043e\u043b\u044e\u0442\u043d\u0430\u044f \u0441\u0432\u043e\u0431\u043e\u0434\u0430, \u0441\u043c\u0435\u043b\u043e\u0441\u0442\u044c \u0438 \u043b\u0435\u0433\u043a\u0438\u0439 \u0441\u0442\u0430\u0440\u0442." }
-    };
+        function reduceTo22(num) {
+            let n = Math.abs(parseInt(num, 10)) || 22;
+            while (n > 22) {
+                let sum = 0;
+                String(n).split('').forEach(d => sum += parseInt(d, 10));
+                n = sum;
+            }
+            return n === 0 ? 22 : n;
+        }
 
-    function calculateMatrix() {
-      const val = document.getElementById('birthDate').value;
-      if (!val) return;
-      const parts = val.split('-');
-      const y = parseInt(parts[0]);
-      const m = parseInt(parts[1]);
-      const d = parseInt(parts[2]);
-      const dayArcana = reduceTo22(d);
-      const monthArcana = reduceTo22(m);
-      const yearArcana = reduceTo22(String(y).split('').reduce((acc, c) => acc + parseInt(c), 0));
-      const karmaArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
-      const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana + karmaArcana);
-      const moneyArcana = reduceTo22(karmaArcana + centerArcana);
+        const arcanaData = {
+            1: {
+                name: "Аркан 1 — Маг (Первооткрыватель)",
+                plus: "Генератор прорывных идей, лидер-новатор, способный материализовать проекты с нуля силой мысли и слова.",
+                comfort: "Твоя зона силы — личная автономия, запуск уникальных авторских продуктов и роль главного архитектора смыслов."
+            },
+            2: {
+                name: "Аркан 2 — Жрица (Оракул)",
+                plus: "Тонкая эмпатия, дипломатия, видение скрытых мотивов людей и глубокая аналитическая интуиция.",
+                comfort: "Твой ресурс восстанавливается в атмосфере тайны, спокойного созерцания и глубокого консультирования один на один."
+            },
+            3: {
+                name: "Аркан 3 — Императрица",
+                plus: "Природный магнетизм, изобилие, умение выращивать прибыльные проекты и создавать вокруг себя статус и комфорт.",
+                comfort: "Твоя точка опоры — материальный достаток, делегирование быта, эстетика пространства и забота о собственном теле."
+            },
+            4: {
+                name: "Аркан 4 — Император",
+                plus: "Масштабное системное мышление, железная структура, умение выстраивать империи, команды и твердый порядок.",
+                comfort: "Твой ресурс — четкие правила игры, контроль ключевых метрик, стратегическое управление и высокий социальный статус."
+            },
+            5: {
+                name: "Аркан 5 — Иерофант (Учитель)",
+                plus: "Дар структурировать сложные знания в простые системы, авторитетное наставничество и верность твердым принципам.",
+                comfort: "Твоя точка комфорта — передача проверенной методологии ученикам, порядок в документах и уважение к твоему опыту."
+            },
+            6: {
+                name: "Аркан 6 — Влюбленные",
+                plus: "Талант выстраивать горячие коммуникации, безупречный визуальный вкус, создание красоты и притяжение нужных связей.",
+                comfort: "Твой ресурс — работа по любви без принуждения, эстетичное окружение, признание и эмоциональный отклик от аудитории."
+            },
+            7: {
+                name: "Аркан 7 — Колесница (Победитель)",
+                plus: "Стремительная скорость реализации, фокус на большой цели, драйв экспансии и умение вести команду за собой.",
+                comfort: "Твоя точка силы — динамика, смена локаций, четкий маршрут к амбициозной цели и делегирование рутины исполнителям."
+            },
+            8: {
+                name: "Аркан 8 — Справедливость",
+                plus: "Кристальная ясность ума, понимание причинно-следственных законов, честность и талант видеть суть любой системы.",
+                comfort: "Твой ресурс — прозрачные договоренности, юридическая и финансовая чистота, баланс между вкладом и вознаграждением."
+            },
+            9: {
+                name: "Аркан 9 — Отшельник (Мудрец)",
+                plus: "Глубинная интеллектуальная экспертиза, самодостаточность, фундаментальность и верность качеству без суеты.",
+                comfort: "Твоя точка комфорта — личное пространство для глубокой работы, избирательный круг общения и высокий чек за точечный консалтинг."
+            },
+            10: {
+                name: "Аркан 10 — Колесо Фортуны",
+                plus: "Врожденное чутье на выгодные тренды, легкость на подъем, умение оказываться в нужное время в денежном потоке.",
+                comfort: "Твой ресурс — свободный график без тисков жесткого режима, доверие синхрониям и работа на волне вдохновения."
+            },
+            11: {
+                name: "Аркан 11 — Сила",
+                plus: "Колоссальный энергетический аккумулятор, харизма действия, выносливость и способность сдвигать с места тяжелые рынки.",
+                comfort: "Твоя точка опоры — активный сброс напряжения через спорт, большие вызовы и управление процессами без микроменеджмента."
+            },
+            12: {
+                name: "Аркан 12 — Повешенный (Новатор)",
+                plus: "Парадоксальное креативное мышление, способность увидеть гениальное решение под углом, недоступным конкурентам.",
+                comfort: "Твой ресурс — творческая свобода, создание инноваций и жесткое правило работать только по 100% предоплате."
+            },
+            13: {
+                name: "Аркан 13 — Смерть (Трансформатор)",
+                plus: "Бесстрашие перед кризисами, умение быстро отсекать мертвый балласт и перезапускать проекты с кратным ростом.",
+                comfort: "Твоя точка силы — динамичные перемены, антикризисное управление, расчистка старого и запуск смелых реформ."
+            },
+            14: {
+                name: "Аркан 14 — Умеренность (Алхимик)",
+                plus: "Тонкое чувство меры, дипломатичность, соединение несочетаемого, исцеляющее спокойствие и премиальный вкус.",
+                comfort: "Твой ресурс — размеренный ритм без авралов, долгосрочный сложный процент, искусство и гармоничная атмосфера."
+            },
+            15: {
+                name: "Аркан 15 — Дьявол (Искуситель)",
+                plus: "Гипнотическая харизма, рентгеновское видение чужих слабостей и амбиций, магнетизм больших денег и власти.",
+                comfort: "Твоя точка комфорта — масштабные переговоры, премиальный сегмент рынка, роскошь и открытая реализация своих амбиций."
+            },
+            16: {
+                name: "Аркан 16 — Башня (Архитектор)",
+                plus: "Духовное лидерство, способность ломать устаревшие догмы и выстраивать на их месте несокрушимые новые структуры.",
+                comfort: "Твой ресурс — осознанные регулярные обновления в жизни и бизнесе, реинжиниринг систем и внутренняя опора."
+            },
+            17: {
+                name: "Аркан 17 — Звезда",
+                plus: "Яркая неординарность, медийный магнетизм, вдохновение тысяч людей и реализация уникального творческого дара.",
+                comfort: "Твоя точка силы — сцена, публичность, сильный личный бренд и вера в свою исключительную миссию."
+            },
+            18: {
+                name: "Аркан 18 — Луна",
+                plus: "Мощная материализация мыслей, управление образами, глубокая психология и притягательная мистическая интуиция.",
+                comfort: "Твой ресурс — работа с подсознанием, визуалом, дизайном или сторителлингом при опоре на твердые факты."
+            },
+            19: {
+                name: "Аркан 19 — Солнце",
+                plus: "Масштабное общественное лидерство, неугасаемый оптимизм, щедрость и способность обогреть и зарядить огромные команды.",
+                comfort: "Твоя точка комфорта — множество параллельных источников дохода, масштабные проекты, признание и процветание."
+            },
+            20: {
+                name: "Аркан 20 — Страшный Суд",
+                plus: "Глубокая связь с силой рода, системное видение, умение перезапускать семейные сценарии и выходить на новый уровень.",
+                comfort: "Твой ресурс — уважение к корням без слияния с родительскими страхами, создание семейного капитала и масштабных систем."
+            },
+            21: {
+                name: "Аркан 21 — Мир (Космополит)",
+                plus: "Глобальное мышление без границ, легкость масштабирования в онлайне, миротворчество и открытость всему миру.",
+                comfort: "Твоя точка силы — международные проекты, путешествия, цифровая свобода и работа на глобальную аудиторию."
+            },
+            22: {
+                name: "Аркан 22 — Шут (Свободный дух)",
+                plus: "Гениальная спонтанность, отсутствие рамок в голове, легкий старт смелых стартапов и нестандартный прорыв.",
+                comfort: "Твой ресурс — проектная работа с высокой степенью свободы, геймификация бизнеса и надежная финансовая подушка."
+            }
+        };
 
-      document.getElementById('nodeDay').textContent = dayArcana;
-      document.getElementById('nodeMonth').textContent = monthArcana;
-      document.getElementById('nodeYear').textContent = yearArcana;
-      document.getElementById('nodeKarma').textContent = karmaArcana;
-      document.getElementById('nodeCenter').textContent = centerArcana;
-      document.getElementById('nodeMoney').textContent = moneyArcana;
+        function calculateMatrix() {
+            const val = document.getElementById('birthDate').value;
+            if (!val) return;
+            const parts = val.split('-');
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
 
-      const dayData = arcanaData[dayArcana] || arcanaData[7];
-      document.getElementById('plusTitle').textContent = dayData.name;
-      document.getElementById('plusDesc').textContent = dayData.desc;
-      document.getElementById('centerTitle').textContent = '\u0426\u0435\u043d\u0442\u0440: \u0410\u0440\u043a\u0430\u043d ' + centerArcana;
-      document.getElementById('matrixDisplay').style.display = 'block';
-      toggleMode('plus');
-    }
-    function toggleMode(mode) {
-      const btnPlus = document.getElementById('btnModePlus');
-      const btnMinus = document.getElementById('btnModeMinus');
-      const cPlus = document.getElementById('contentPlus');
-      const cMinus = document.getElementById('contentMinus');
-      if (mode === 'plus') {
-        btnPlus.className = 'switch-btn active-plus';
-        btnMinus.className = 'switch-btn';
-        cPlus.style.display = 'block';
-        cMinus.style.display = 'none';
-      } else {
-        btnPlus.className = 'switch-btn';
-        btnMinus.className = 'switch-btn active-minus';
-        cPlus.style.display = 'none';
-        cMinus.style.display = 'block';
-      }
-    }
-    function calculatePair() {
-      const d1 = document.getElementById('pairDate1').value;
-      const d2 = document.getElementById('pairDate2').value;
-      if (!d1 || !d2) return;
-      let hash = 0;
-      (d1 + d2).split('').forEach(c => hash += c.charCodeAt(0));
-      const percent = 65 + (hash % 30);
-      document.getElementById('pairPercent').textContent = percent + '%';
-      document.getElementById('pairDisplay').style.display = 'block';
-    }
-    function calculateIdeal() {
-      document.getElementById('idealDisplay').style.display = 'block';
-    }
-  </script>
+            const dayArcana = reduceTo22(d);
+            const monthArcana = reduceTo22(m);
+            const yearSum = String(y).split('').reduce((acc, c) => acc + parseInt(c, 10), 0);
+            const yearArcana = reduceTo22(yearSum);
+
+            const bottomArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
+            const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana + bottomArcana);
+
+            // Вершины родового квадрата и финансовый узел
+            const tlArcana = reduceTo22(dayArcana + monthArcana);
+            const trArcana = reduceTo22(monthArcana + yearArcana);
+            const brArcana = reduceTo22(yearArcana + bottomArcana);
+            const blArcana = reduceTo22(bottomArcana + dayArcana);
+            const moneyArcana = reduceTo22(yearArcana + bottomArcana + centerArcana);
+
+            // Заполняем SVG
+            document.getElementById('svgDay').textContent = dayArcana;
+            document.getElementById('svgMonth').textContent = monthArcana;
+            document.getElementById('svgYear').textContent = yearArcana;
+            document.getElementById('svgTail').textContent = bottomArcana;
+            document.getElementById('svgCenter').textContent = centerArcana;
+            document.getElementById('svgTL').textContent = tlArcana;
+            document.getElementById('svgTR').textContent = trArcana;
+            document.getElementById('svgBR').textContent = brArcana;
+            document.getElementById('svgBL').textContent = blArcana;
+            document.getElementById('svgMoney').textContent = moneyArcana;
+
+            document.getElementById('matrixVisual').style.display = 'block';
+
+            // Заполняем 3 бесплатных карточки
+            const dayData = arcanaData[dayArcana];
+            const monthData = arcanaData[monthArcana];
+            const centerData = arcanaData[centerArcana];
+
+            document.getElementById('dayArcanaName').textContent = dayData.name;
+            document.getElementById('dayArcanaDesc').textContent = dayData.plus;
+
+            document.getElementById('monthArcanaName').textContent = monthData.name;
+            document.getElementById('monthArcanaDesc').textContent = monthData.plus;
+
+            document.getElementById('centerArcanaName').textContent = centerData.name;
+            document.getElementById('centerArcanaDesc').textContent = centerData.comfort;
+
+            // Персонализируем заголовок замка под рассчитанный узел пользователя
+            document.getElementById('tailArcanaPreview').textContent = "Теневой узел: Аркан " + bottomArcana + " и канал денег " + moneyArcana;
+            document.getElementById('lockNodeTitle').textContent = "Узел (Аркан " + bottomArcana + ") заблокирован";
+
+            document.getElementById('matrixDisplay').style.display = 'block';
+        }
+
+        function calculatePair() {
+            const d1 = document.getElementById('pairDate1').value;
+            const d2 = document.getElementById('pairDate2').value;
+            if (!d1 || !d2) return;
+
+            let hash = 0;
+            (d1 + d2).split('').forEach(c => hash += c.charCodeAt(0));
+            const percent = 72 + (hash % 25);
+
+            const p1 = d1.split('-');
+            const p2 = d2.split('-');
+            const a1 = reduceTo22(parseInt(p1[2], 10));
+            const a2 = reduceTo22(parseInt(p2[2], 10));
+            const unionArcana = reduceTo22(a1 + a2);
+
+            const unionData = arcanaData[unionArcana];
+            document.getElementById('pairPercent').textContent = percent + '%';
+            document.getElementById('pairUnionTitle').textContent = "Код пары: " + unionData.name;
+            document.getElementById('pairUnionDesc').textContent = "В плюсе ваш союз дает: " + unionData.plus.toLowerCase();
+
+            document.getElementById('pairDisplay').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
