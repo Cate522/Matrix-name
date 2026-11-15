@@ -1,738 +1,1327 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Матрица Судьбы | Аура Код</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg: #08080c;
-            --card-bg: rgba(18, 18, 24, 0.85);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --accent-purple: #9d4edd;
-            --accent-gold: #e5a93c;
-            --accent-emerald: #10b981;
-            --accent-crimson: #e11d48;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body {
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 0%, #1e1136 0%, #08080c 65%);
-            color: var(--text-main);
-            padding: 16px 14px 48px;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Матрица Судьбы — Полная Диагностика Кода</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-deep: #060608;
+      --bg-card: #101015;
+      --bg-card-hover: #16161e;
+      --gold: #d4af37;
+      --gold-light: #f3e5ab;
+      --gold-dim: rgba(212, 175, 55, 0.25);
+      --crimson: #e63946;
+      --emerald: #2ec4b6;
+      --rose: #ff5d8f;
+      --text-main: #f4f4f6;
+      --text-muted: #9a9aa6;
+      --border-gold: rgba(212, 175, 55, 0.32);
+    }
 
-        /* Навигация */
-        .tabs-nav {
-            display: flex;
-            background: rgba(12, 12, 16, 0.8);
-            border-radius: 14px;
-            padding: 4px;
-            margin-bottom: 24px;
-            border: 1px solid var(--card-border);
-            backdrop-filter: blur(12px);
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 12px 4px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-muted);
-            border: none;
-            background: transparent;
-            border-radius: 10px;
-            transition: all 0.25s ease;
-            cursor: pointer;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(229, 169, 60, 0.2));
-            color: var(--accent-gold);
-            border: 1px solid rgba(229, 169, 60, 0.35);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-        .tab-content { display: none; animation: fadeIn 0.35s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* Заголовки */
-        .hero-title {
-            font-size: 26px;
-            font-weight: 900;
-            text-align: center;
-            line-height: 1.2;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #fff 0%, #e5a93c 50%, #9d4edd 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 20px;
-            line-height: 1.45;
-        }
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a1528 0%, var(--bg-deep) 65%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 90px;
+    }
 
-        /* Карточка ввода */
-        .date-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 24px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-        .input-label {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--accent-gold);
-            display: block;
-            margin-bottom: 8px;
-        }
-        .date-input {
-            width: 100%;
-            background: #121218;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 14px;
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 14px;
-            outline: none;
-            transition: 0.25s;
-        }
-        .date-input:focus {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 12px rgba(229, 169, 60, 0.25);
-        }
-        .calc-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #7b2cbf, #9d4edd);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 16px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
-            transition: transform 0.15s ease;
-        }
-        .calc-btn:active { transform: scale(0.98); }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
 
-        /* Сложная геометрия Матрицы */
-        .matrix-visual {
-            position: relative;
-            width: 100%;
-            max-width: 340px;
-            aspect-ratio: 1;
-            margin: 0 auto 24px;
-            display: none;
-        }
-        .matrix-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 20px rgba(157, 78, 221, 0.2));
-        }
+    /* Шапка */
+    .header {
+      text-align: center;
+      padding: 12px 0 18px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      margin-bottom: 20px;
+    }
 
-        /* Карточки результатов */
-        .result-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-left: 4px solid var(--accent-purple);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-        .result-card.gold-border { border-left-color: var(--accent-gold); }
-        .result-card.emerald-border { border-left-color: var(--accent-emerald); }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 8px;
-            background: rgba(157, 78, 221, 0.2);
-            color: #d8b4fe;
-            border: 1px solid rgba(157, 78, 221, 0.35);
-        }
-        .badge.gold {
-            background: rgba(229, 169, 60, 0.18);
-            color: #fde047;
-            border-color: rgba(229, 169, 60, 0.4);
-        }
-        .badge.emerald {
-            background: rgba(16, 185, 129, 0.18);
-            color: #6ee7b7;
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-        .result-arcana { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-        .result-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      padding: 5px 12px;
+      border-radius: 99px;
+      margin-bottom: 10px;
+    }
 
-        /* Платный блок с замком */
-        .blur-container {
-            position: relative;
-            overflow: hidden;
-            border-radius: 18px;
-            margin-top: 18px;
-            border: 1px solid rgba(229, 169, 60, 0.4);
-            background: rgba(18, 18, 24, 0.9);
-            padding: 20px;
-            min-height: 230px;
-        }
-        .blurred-content { filter: blur(6px); user-select: none; pointer-events: none; opacity: 0.35; }
-        .lock-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(180deg, rgba(8, 8, 12, 0.55) 0%, rgba(8, 8, 12, 0.95) 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-        .lock-icon {
-            font-size: 34px;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 0 12px var(--accent-gold));
-        }
-        .lock-title {
-            font-size: 17px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .lock-desc {
-            font-size: 12.5px;
-            color: #cbd5e1;
-            margin-bottom: 18px;
-            line-height: 1.45;
-            max-width: 280px;
-        }
-        .pay-btn {
-            background: linear-gradient(135deg, #e5a93c 0%, #b8860b 100%);
-            color: #000;
-            font-size: 14px;
-            font-weight: 900;
-            text-decoration: none;
-            padding: 14px 24px;
-            border-radius: 12px;
-            display: inline-block;
-            box-shadow: 0 6px 20px rgba(229, 169, 60, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            width: 100%;
-            max-width: 260px;
-        }
+    .title-main {
+      font-family: "Georgia", serif;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, var(--gold-light) 50%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
 
-        /* Совместимость и даты */
-        .pair-percent {
-            font-size: 60px;
-            font-weight: 900;
-            text-align: center;
-            background: linear-gradient(135deg, var(--accent-emerald), #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 6px 0;
-        }
-        .date-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-        .date-pill {
-            background: #161620;
-            border: 1px solid rgba(229, 169, 60, 0.35);
-            padding: 10px 6px;
-            text-align: center;
-            border-radius: 10px;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: var(--accent-gold);
-        }
-        .matrix-display { display: none; margin-top: 10px; }
-    </style>
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Карточка ввода даты */
+    .card {
+      background: linear-gradient(180deg, rgba(24, 24, 34, 0.92) 0%, rgba(12, 12, 18, 0.98) 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(212, 175, 55, 0.08);
+      margin-bottom: 18px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr 1.2fr;
+      gap: 8px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      background: #09090d;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: #fff;
+      padding: 13px 10px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+      appearance: none;
+      text-align: center;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-gold {
+      width: 100%;
+      background: linear-gradient(135deg, #e5c158 0%, #b8860b 100%);
+      color: #08080a;
+      border: none;
+      border-radius: 14px;
+      padding: 15px 20px;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(212, 175, 55, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-gold:active {
+      transform: scale(0.98);
+    }
+
+    .live-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      background: #2ec4b6;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #2ec4b6;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.25); }
+    }
+
+    /* Лоадер расчета */
+    #loader-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .spinner-ring {
+      width: 64px;
+      height: 64px;
+      border: 3px solid rgba(212, 175, 55, 0.15);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Экран результатов */
+    #result-screen {
+      display: none;
+    }
+
+    .user-summary-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid var(--border-gold);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    /* Визуальная Матрица (SVG) */
+    .matrix-wrapper {
+      background: radial-gradient(circle at center, #1b1726 0%, #09090d 75%);
+      border: 1px solid var(--border-gold);
+      border-radius: 22px;
+      padding: 12px 8px 14px;
+      position: relative;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.6);
+      margin-bottom: 14px;
+    }
+
+    .matrix-hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+      letter-spacing: 0.4px;
+    }
+
+    .matrix-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    /* Инспектор выбранного узла Матрицы */
+    .node-inspector {
+      background: linear-gradient(135deg, #191524 0%, #0f0f15 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.15);
+      transition: all 0.25s ease;
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .inspector-tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .tag-free {
+      background: rgba(46, 196, 182, 0.15);
+      color: var(--emerald);
+      border: 1px solid rgba(46, 196, 182, 0.4);
+    }
+
+    .tag-locked {
+      background: rgba(230, 57, 70, 0.18);
+      color: #ff758f;
+      border: 1px solid rgba(230, 57, 70, 0.4);
+    }
+
+    .inspector-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .inspector-desc {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #dddde6;
+    }
+
+    /* Прогресс открытости */
+    .progress-box {
+      background: #0d0d12;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #1c1c26;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      width: 24%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald), var(--gold));
+      border-radius: 99px;
+    }
+
+    /* Секции расшифровки */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-card.free-card {
+      border-left: 3px solid var(--gold);
+    }
+
+    .section-card.locked-card {
+      border: 1px solid rgba(230, 57, 70, 0.35);
+      background: linear-gradient(180deg, #13111a 0%, #0b0a0f 100%);
+      cursor: pointer;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .arcana-pill {
+      background: rgba(212, 175, 55, 0.16);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .section-body {
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: #ccccd6;
+    }
+
+    .blur-text {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.65;
+      margin-top: 8px;
+    }
+
+    .lock-overlay-cta {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(212, 175, 55, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-unlock-inline {
+      background: rgba(212, 175, 55, 0.18);
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Плавающая нижняя панель оплаты */
+    .sticky-paybar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 15, 0.96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--gold);
+      padding: 10px 16px;
+      z-index: 90;
+      display: none;
+    }
+
+    .sticky-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .price-col {
+      line-height: 1.2;
+    }
+
+    .price-old {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .price-now {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold-light);
+    }
+
+    /* Модальное окно оплаты */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: linear-gradient(180deg, #1b1726 0%, #0c0c12 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 22px;
+      max-width: 420px;
+      width: 100%;
+      padding: 22px 18px;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: #fff;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 14px 0 18px;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .feature-list li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .timer-badge {
+      text-align: center;
+      background: rgba(230, 57, 70, 0.15);
+      border: 1px solid rgba(230, 57, 70, 0.4);
+      color: #ff8fa3;
+      padding: 7px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* SVG интерактивность */
+    .svg-node {
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .svg-node:hover {
+      opacity: 0.9;
+    }
+    .node-selected circle.main-circle {
+      stroke-width: 3.5px !important;
+      filter: drop-shadow(0 0 8px #ffd700);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="tabs-nav">
-        <button class="tab-btn active" onclick="switchMainTab('matrix', this)">✨ Матрица</button>
-        <button class="tab-btn" onclick="switchMainTab('pair', this)">❤️ Пара</button>
-        <button class="tab-btn" onclick="switchMainTab('ideal', this)">🔍 Идеал</button>
+  <div class="container">
+    <header class="header">
+      <div class="badge-top">✦ Диагностика Судьбы и Кармы ✦</div>
+      <h1 class="title-main">Матрица Судьбы: Полная Карта Энергий</h1>
+      <p class="subtitle">Геометрия 22 Арканов: кармический хвост, канал денег, блоки в любви и родовые программы</p>
+    </header>
+
+    <!-- ЭКРАН 1: ВВОД ДАТЫ -->
+    <div id="input-screen">
+      <div class="card">
+        <div class="input-group">
+          <label class="input-label">Ваше Имя (необязательно)</label>
+          <input type="text" id="user-name" placeholder="Например: Анна" />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Дата вашего рождения</label>
+          <div class="date-row">
+            <select id="birth-day"></select>
+            <select id="birth-month">
+              <option value="1">Январь</option>
+              <option value="2">Февраль</option>
+              <option value="3">Март</option>
+              <option value="4">Апрель</option>
+              <option value="5">Май</option>
+              <option value="6">Июнь</option>
+              <option value="7">Июль</option>
+              <option value="8">Август</option>
+              <option value="9">Сентябрь</option>
+              <option value="10">Октябрь</option>
+              <option value="11">Ноябрь</option>
+              <option value="12">Декабрь</option>
+            </select>
+            <select id="birth-year"></select>
+          </div>
+        </div>
+
+        <button class="btn-gold" onclick="startCalculation()">Рассчитать мою Матрицу 🔮</button>
+
+        <div class="live-counter">
+          <span class="dot-live"></span>
+          <span>Сейчас рассчитывают: <strong>47 человек</strong></span>
+        </div>
+      </div>
     </div>
 
-    <!-- ВКЛАДКА 1: МАТРИЦА -->
-    <div id="tab-matrix" class="tab-content active">
-        <h1 class="hero-title">Матрица Судьбы</h1>
-        <p class="hero-desc">Рассчитай личную октаграмму, узнай врожденные таланты и сними блокировку с денежного канала.</p>
-
-        <div class="date-card">
-            <span class="input-label">Дата твоего рождения</span>
-            <input type="date" id="birthDate" class="date-input">
-            <button class="calc-btn" onclick="calculateMatrix()">Рассчитать Матрицу</button>
-        </div>
-
-        <div id="matrixDisplay" class="matrix-display">
-            <!-- Сложная SVG геометрия Матрицы -->
-            <div class="matrix-visual" id="matrixVisual">
-                <svg class="matrix-svg" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#9d4edd" stop-opacity="0.85"/>
-                            <stop offset="100%" stop-color="#e5a93c" stop-opacity="0.85"/>
-                        </linearGradient>
-                        <linearGradient id="nodePurple" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#9d4edd"/>
-                            <stop offset="100%" stop-color="#4c1d95"/>
-                        </linearGradient>
-                        <linearGradient id="nodeGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#fde047"/>
-                            <stop offset="100%" stop-color="#ca8a04"/>
-                        </linearGradient>
-                        <linearGradient id="nodeEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#34d399"/>
-                            <stop offset="100%" stop-color="#059669"/>
-                        </linearGradient>
-                        <linearGradient id="nodeCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#fb7185"/>
-                            <stop offset="100%" stop-color="#be123c"/>
-                        </linearGradient>
-                    </defs>
-
-                    <!-- Внешние орбиты -->
-                    <circle cx="170" cy="170" r="156" fill="none" stroke="rgba(229,169,60,0.18)" stroke-width="1" stroke-dasharray="3 5"/>
-                    <circle cx="170" cy="170" r="138" fill="none" stroke="rgba(157,78,221,0.25)" stroke-width="1"/>
-                    <circle cx="170" cy="170" r="85" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="2 4"/>
-
-                    <!-- Родовой квадрат (прямой) -->
-                    <polygon points="62,62 278,62 278,278 62,278" fill="rgba(157,78,221,0.03)" stroke="url(#lineGrad)" stroke-width="1.5"/>
-
-                    <!-- Личностный квадрат (диагональный ромб) -->
-                    <polygon points="170,18 322,170 170,322 18,170" fill="rgba(229,169,60,0.03)" stroke="url(#lineGrad)" stroke-width="1.8"/>
-
-                    <!-- Осевые линии Неба, Земли и Рода -->
-                    <line x1="170" y1="18" x2="170" y2="322" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
-                    <line x1="18" y1="170" x2="322" y2="170" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
-                    <line x1="62" y1="62" x2="278" y2="278" stroke="rgba(157,78,221,0.35)" stroke-width="1.2" stroke-dasharray="4 4"/>
-                    <line x1="62" y1="278" x2="278" y2="62" stroke="rgba(157,78,221,0.35)" stroke-width="1.2" stroke-dasharray="4 4"/>
-
-                    <!-- Линия Денег и Отношений (внутренний скос) -->
-                    <line x1="170" y1="265" x2="265" y2="170" stroke="#10b981" stroke-width="2" opacity="0.8"/>
-
-                    <!-- Угловые родовые узлы -->
-                    <circle cx="62" cy="62" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
-                    <text id="svgTL" x="62" y="66" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
-
-                    <circle cx="278" cy="62" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
-                    <text id="svgTR" x="278" y="66" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
-
-                    <circle cx="62" cy="278" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
-                    <text id="svgBL" x="62" y="282" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
-
-                    <circle cx="278" cy="278" r="12" fill="#1e1b2e" stroke="#9d4edd" stroke-width="1.5"/>
-                    <text id="svgBR" x="278" y="282" fill="#e2e8f0" font-size="11" font-weight="700" text-anchor="middle">0</text>
-
-                    <!-- Узел Финансового Канала -->
-                    <circle cx="218" cy="218" r="13" fill="url(#nodeEmerald)" stroke="#fff" stroke-width="1.5"/>
-                    <text id="svgMoney" x="218" y="222" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">0</text>
-
-                    <!-- Главные вершины: День, Месяц, Год, Хвост -->
-                    <circle cx="18" cy="170" r="16" fill="url(#nodePurple)" stroke="#fff" stroke-width="1.5"/>
-                    <text id="svgDay" x="18" y="175" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
-
-                    <circle cx="170" cy="18" r="16" fill="url(#nodePurple)" stroke="#fff" stroke-width="1.5"/>
-                    <text id="svgMonth" x="170" y="23" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
-
-                    <circle cx="322" cy="170" r="16" fill="url(#nodeCrimson)" stroke="#fff" stroke-width="1.5"/>
-                    <text id="svgYear" x="322" y="175" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
-
-                    <circle cx="170" cy="322" r="17" fill="url(#nodeCrimson)" stroke="#fda4af" stroke-width="2"/>
-                    <text id="svgTail" x="170" y="327" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">0</text>
-
-                    <!-- Центр Матрицы -->
-                    <circle cx="170" cy="170" r="23" fill="url(#nodeGold)" stroke="#fff" stroke-width="2"/>
-                    <text id="svgCenter" x="170" y="176" fill="#09090b" font-size="16" font-weight="900" text-anchor="middle">0</text>
-                </svg>
-            </div>
-
-            <!-- БЕСПЛАТНЫЙ КОНТЕНТ: 3 РАЗВЕРНУТЫХ БЛОКА -->
-            <div class="result-card">
-                <span class="badge">1. Визитная карточка (День)</span>
-                <div class="result-arcana" id="dayArcanaName">Аркан</div>
-                <div class="result-text" id="dayArcanaDesc">Описание...</div>
-            </div>
-
-            <div class="result-card emerald-border">
-                <span class="badge emerald">2. Врожденный талант и ресурс (Месяц)</span>
-                <div class="result-arcana" id="monthArcanaName">Аркан</div>
-                <div class="result-text" id="monthArcanaDesc">Описание...</div>
-            </div>
-
-            <div class="result-card gold-border">
-                <span class="badge gold">3. Точка комфорта души (Центр)</span>
-                <div class="result-arcana" id="centerArcanaName">Аркан</div>
-                <div class="result-text" id="centerArcanaDesc">Описание...</div>
-            </div>
-
-            <!-- ПЛАТНЫЙ БЛОК (БЛЮР) -->
-            <div class="blur-container">
-                <div class="blurred-content">
-                    <div class="result-arcana" id="tailArcanaPreview">Кармический узел: Аркан 15</div>
-                    <div class="result-text">Скрытая вторичная выгода теневого узла блокирует финансовый рост и провоцирует кассовые разрывы. 3 действия-антидота для пробития потолка и 21-дневный микропротокол перепрошивки.</div>
-                </div>
-                <div class="lock-overlay">
-                    <div class="lock-icon">🔒</div>
-                    <div class="lock-title" id="lockNodeTitle">Денежный узел скрыт</div>
-                    <div class="lock-desc">Забери расшифровку своего теневого блока, 3 действия-антидота и пошаговый протокол деактивации на 21 день.</div>
-                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Скачать Атлас (390 ₽)</a>
-                </div>
-            </div>
-        </div>
+    <!-- ЭКРАН 2: ЗАГРУЗКА -->
+    <div id="loader-screen" class="card">
+      <div class="spinner-ring"></div>
+      <h3 style="color: var(--gold-light); margin-bottom: 8px; font-size: 18px;" id="loader-title">Построение Октаграммы...</h3>
+      <p style="font-size: 13px; color: var(--text-muted);" id="loader-sub">Расчет кармического хвоста и финансового кода</p>
     </div>
 
-    <!-- ВКЛАДКА 2: ПАРА -->
-    <div id="tab-pair" class="tab-content">
-        <h1 class="hero-title">Код Совместимости</h1>
-        <p class="hero-desc">Проверь кармическое притяжение и скрытые триггеры конфликтов по двум датам рождения.</p>
-
-        <div class="date-card">
-            <span class="input-label">Твоя дата рождения</span>
-            <input type="date" id="pairDate1" class="date-input">
-            <span class="input-label">Дата партнера</span>
-            <input type="date" id="pairDate2" class="date-input">
-            <button class="calc-btn" onclick="calculatePair()">Рассчитать совместимость</button>
+    <!-- ЭКРАН 3: РЕЗУЛЬТАТЫ И МАТРИЦА -->
+    <div id="result-screen">
+      <div class="user-summary-bar">
+        <div>
+          <span style="color: var(--text-muted);">Дата:</span>
+          <strong id="display-date" style="color: var(--gold-light); margin-left: 4px;">—</strong>
         </div>
+        <button class="btn-reset" onclick="resetApp()">Изменить дату</button>
+      </div>
 
-        <div id="pairDisplay" class="matrix-display">
-            <div class="result-card gold-border" style="text-align: center;">
-                <span class="badge gold">Индекс резонанса пары</span>
-                <div class="pair-percent" id="pairPercent">85%</div>
-                <div class="result-arcana" id="pairUnionTitle">Кармический союз лидеров</div>
-                <div class="result-text" id="pairUnionDesc">Ваши энергии создают мощное притяжение, но требуют осознанного распределения ролей.</div>
-            </div>
+      <!-- ИНТЕРАКТИВНАЯ МАТРИЦА -->
+      <div class="matrix-wrapper">
+        <div class="matrix-hint">👆 Нажмите на любой узел или цифру на схеме для расшифровки</div>
+        <div id="svg-matrix-holder"></div>
 
-            <div class="blur-container">
-                <div class="blurred-content">
-                    <div class="result-arcana">Главный триггер ссор в паре</div>
-                    <div class="result-text">В периоды стресса активируется защитный механизм. Точная фраза-пароль для мгновенного гашения конфликта и перевода напряжения в близость.</div>
-                </div>
-                <div class="lock-overlay">
-                    <div class="lock-icon">🔒</div>
-                    <div class="lock-title">Точки разрыва скрыты</div>
-                    <div class="lock-desc">Узнай скрытую причину ваших ссор и получи готовые фразы-инструкции для гармонизации союза в полном Атласе.</div>
-                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть разбор пары (390 ₽)</a>
-                </div>
-            </div>
+        <div class="matrix-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#d4af37;"></span> Личный квадрат</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#e63946;"></span> Кармический хвост</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#2ec4b6;"></span> Канал Денег 💰</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ff5d8f;"></span> Отношения ❤️</div>
         </div>
+      </div>
+
+      <!-- ДИНАМИЧЕСКИЙ ИНСПЕКТОР ТОЧКИ -->
+      <div class="node-inspector" id="node-inspector">
+        <div class="inspector-header">
+          <span style="font-size: 11px; color: var(--text-muted);" id="insp-zone">ВЫБРАННЫЙ УЗЕЛ МАТРИЦЫ</span>
+          <span class="inspector-tag tag-free" id="insp-tag">ОТКРЫТО</span>
+        </div>
+        <div class="inspector-title" id="insp-title">Нажмите на любую точку схемы</div>
+        <div class="inspector-desc" id="insp-desc">Выберите интересующий вас узел на звезде выше, чтобы увидеть, какая энергия управляет этой сферой вашей жизни.</div>
+      </div>
+
+      <!-- ШКАЛА РАЗБЛОКИРОВКИ -->
+      <div class="progress-box">
+        <div class="progress-top">
+          <span style="color: var(--emerald);">🔓 Открыто базовых узлов: 24%</span>
+          <span style="color: #ff758f;">🔒 Закрыто: 76% (Деньги, Любовь, Род)</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill"></div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted);">
+          В бесплатном режиме доступны базовые точки личности и главный узел кармы. Финансовый код, совместимость и проработка блоков закрыты.
+        </p>
+      </div>
+
+      <!-- БЛОК 1: ВИЗИТНАЯ КАРТОЧКА (БЕСПЛАТНО) -->
+      <div class="section-card free-card">
+        <div class="section-head">
+          <div class="section-title">1. Визитная карточка и ресурс (0 лет)</div>
+          <span class="arcana-pill" id="pill-portrait">Аркан —</span>
+        </div>
+        <div class="section-body" id="body-portrait"></div>
+      </div>
+
+      <!-- БЛОК 2: ЗОНА КОМФОРТА (БЕСПЛАТНО) -->
+      <div class="section-card free-card">
+        <div class="section-head">
+          <div class="section-title">2. Центр Матрицы (Код Личной Силы)</div>
+          <span class="arcana-pill" id="pill-center">Аркан —</span>
+        </div>
+        <div class="section-body" id="body-center"></div>
+      </div>
+
+      <!-- БЛОК 3: КАРМИЧЕСКИЙ ХВОСТ (БЕСПЛАТНО - ТРИГГЕР) -->
+      <div class="section-card free-card" style="border-left-color: var(--crimson);">
+        <div class="section-head">
+          <div class="section-title">3. Кармический хвост (Теневой узел)</div>
+          <span class="arcana-pill" style="border-color: var(--crimson); color: #ff8fa3;" id="pill-karma">Узел —</span>
+        </div>
+        <div class="section-body" id="body-karma"></div>
+      </div>
+
+      <!-- БЛОК 4: ДЕНЕЖНЫЙ КАНАЛ (ЗАБЛОКИРОВАНО) -->
+      <div class="section-card locked-card" onclick="openPayModal()">
+        <div class="section-head">
+          <div class="section-title">💰 4. Вход в Денежный Канал и Блоки</div>
+          <span class="arcana-pill" id="pill-money">Код — 🔒</span>
+        </div>
+        <div class="section-body">
+          <p id="teaser-money" style="color: #f3e5ab; font-weight: 500; margin-bottom: 6px;"></p>
+          <div class="blur-text">
+            Ваша финансовая емкость напрямую зависит от проработки центрального узла материи. Когда этот аркан уходит в минус, возникают внезапные кассовые разрывы, долги, синдром самозванца и работа на износ без роста дохода. Чтобы пробить финансовый потолок, необходимо отключить родовую программу экономии и активировать профессии по вашему ведущему аркану.
+          </div>
+          <div class="lock-overlay-cta">
+            <span style="font-size: 12px; color: #ff8fa3;">🔒 Скрыты профессии и ключ к деньгам</span>
+            <button class="btn-unlock-inline">Открыть разбор</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- БЛОК 5: КАНАЛ ОТНОШЕНИЙ (ЗАБЛОКИРОВАНО) -->
+      <div class="section-card locked-card" onclick="openPayModal()">
+        <div class="section-head">
+          <div class="section-title">❤️ 5. Сценарий Любви и Партнерства</div>
+          <span class="arcana-pill" id="pill-love">Код — 🔒</span>
+        </div>
+        <div class="section-body">
+          <p id="teaser-love" style="color: #ffccd5; font-weight: 500; margin-bottom: 6px;"></p>
+          <div class="blur-text">
+            По вашей линии партнерства проходит кармический урок привязанности. Именно эта комбинация объясняет, почему притягиваются эмоционально холодные или слабые партнеры, возникает страх предательства и ощущение, что вы тянете отношения в одиночку.
+          </div>
+          <div class="lock-overlay-cta">
+            <span style="font-size: 12px; color: #ff8fa3;">🔒 Скрыт портрет идеального партнера</span>
+            <button class="btn-unlock-inline">Открыть разбор</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- БЛОК 6: РОДОВЫЕ ПРОГРАММЫ И ПРЕДНАЗНАЧЕНИЕ (ЗАБЛОКИРОВАНО) -->
+      <div class="section-card locked-card" onclick="openPayModal()">
+        <div class="section-head">
+          <div class="section-title">👑 6. Сила Рода и Личное Предназначение</div>
+          <span class="arcana-pill" id="pill-rod">Код — 🔒</span>
+        </div>
+        <div class="section-body">
+          <p id="teaser-rod" style="color: #e0c3fc; font-weight: 500; margin-bottom: 6px;"></p>
+          <div class="blur-text">
+            По мужской и женской линиям рода переданы задачи, которые необходимо закрыть до 40 лет. Невыполнение этой задачи включает принудительные кризисы и обнуления.
+          </div>
+          <div class="lock-overlay-cta">
+            <span style="font-size: 12px; color: #ff8fa3;">🔒 Скрыта инструкция вывода в плюс</span>
+            <button class="btn-unlock-inline">Открыть разбор</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-gold" style="margin-top: 10px;" onclick="openPayModal()">
+        🔓 Получить Полную Расшифровку (490 ₽)
+      </button>
     </div>
+  </div>
 
-    <!-- ВКЛАДКА 3: ИДЕАЛ (ТЕПЕРЬ С ВВОДОМ ДАТЫ И РАСЧЕТОМ) -->
-    <div id="tab-ideal" class="tab-content">
-        <h1 class="hero-title">Матрица Идеала</h1>
-        <p class="hero-desc">Введи свою дату рождения, чтобы вычислить 15 дат партнеров с максимальной финансовой и любовной синергией.</p>
-
-        <div class="date-card">
-            <span class="input-label">Твоя дата рождения</span>
-            <input type="date" id="idealBirthDate" class="date-input">
-            <button class="calc-btn" onclick="calculateIdeal()">Найти идеальные даты</button>
-        </div>
-
-        <div id="idealDisplay" class="matrix-display">
-            <div class="result-card emerald-border">
-                <span class="badge emerald">Твой резонанс (Открыто 3 из 15)</span>
-                <div class="result-arcana" id="idealTitle">Твой комплементарный код</div>
-                <div class="result-text" id="idealDesc">В юнгианском анализе максимальное притяжение возникает с партнерами, чьи энергии дополняют твою матрицу:</div>
-                <div class="date-grid">
-                    <div class="date-pill" id="idealPill1">3 число</div>
-                    <div class="date-pill" id="idealPill2">10 число</div>
-                    <div class="date-pill" id="idealPill3">19 число</div>
-                </div>
-            </div>
-
-            <div class="blur-container">
-                <div class="blurred-content">
-                    <div class="date-grid">
-                        <div class="date-pill">🔒 ** число</div>
-                        <div class="date-pill">🔒 ** число</div>
-                        <div class="date-pill">🔒 ** число</div>
-                        <div class="date-pill">🔒 ** число</div>
-                        <div class="date-pill">🔒 ** число</div>
-                        <div class="date-pill">🔒 ** число</div>
-                    </div>
-                </div>
-                <div class="lock-overlay">
-                    <div class="lock-icon">🔒</div>
-                    <div class="lock-title">12 дат заблокированы</div>
-                    <div class="lock-desc">Открой полную таблицу из 15 идеальных архетипических союзов + протоколы финансов и отношений в едином Атласе.</div>
-                    <a href="https://web.tribute.tg/p/K7C" target="_blank" class="pay-btn">Открыть все 15 союзов (390 ₽)</a>
-                </div>
-            </div>
-        </div>
+  <!-- НИЖНЯЯ ЛИПКАЯ ПАНЕЛЬ -->
+  <div class="sticky-paybar" id="sticky-paybar">
+    <div class="sticky-inner">
+      <div class="price-col">
+        <div class="price-old">Полный разбор: 2 990 ₽</div>
+        <div class="price-now">490 ₽ <span style="font-size: 11px; color: var(--emerald); font-weight: 600;">(-84%)</span></div>
+      </div>
+      <button class="btn-gold" style="width: auto; padding: 12px 18px; font-size: 13px;" onclick="openPayModal()">
+        Разблокировать всё 🔓
+      </button>
     </div>
+  </div>
 
-    <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            try { window.Telegram.WebApp.setHeaderColor('#08080c'); } catch(e) {}
-        }
+  <!-- МОДАЛЬНОЕ ОКНО ОПЛАТЫ -->
+  <div class="modal-backdrop" id="pay-modal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closePayModal()">✕</button>
+      <div class="badge-top" style="margin-bottom: 8px;">Персональный Доступ</div>
+      <h2 style="font-family: Georgia, serif; font-size: 20px; color: var(--gold-light); margin-bottom: 8px;">
+        Полная Расшифровка Вашей Матрицы + Атлас 22 Арканов
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        Мгновенный доступ ко всем закрытым узлам вашей даты рождения (<span id="modal-date-str" style="color:#fff;"></span>):
+      </p>
 
-        function switchMainTab(tab, btnEl) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            btnEl.classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active');
-        }
+      <ul class="feature-list">
+        <li><span>💰</span> <span><strong>Финансовый Код (<span id="modal-money-code"></span>):</strong> что перекрывает деньги, ваши денежные профессии и как пробить потолок.</span></li>
+        <li><span>❤️</span> <span><strong>Канал Отношений (<span id="modal-love-code"></span>):</strong> почему повторяются болезненные сценарии и кто ваш партнер по судьбе.</span></li>
+        <li><span>🕯️</span> <span><strong>Проработка Кармического Хвоста (<span id="modal-karma-code"></span>):</strong> пошаговый план закрытия долгов прошлой жизни.</span></li>
+        <li><span>📘</span> <span><strong>Бонус:</strong> Полный «Атлас 22 Арканов» с практиками вывода любой энергии из минуса в плюс.</span></li>
+      </ul>
 
-        function reduceTo22(num) {
-            let n = Math.abs(parseInt(num, 10)) || 22;
-            while (n > 22) {
-                let sum = 0;
-                String(n).split('').forEach(d => sum += parseInt(d, 10));
-                n = sum;
-            }
-            return n === 0 ? 22 : n;
-        }
+      <div class="timer-badge">
+        ⏳ Специальная цена 490 ₽ (вместо 2 990 ₽) действует еще <span id="countdown">14:59</span>
+      </div>
 
-        const arcanaData = {
-            1: {
-                name: "Аркан 1 — Маг (Первооткрыватель)",
-                plus: "Генератор прорывных идей, лидер-новатор, способный материализовать проекты с нуля силой мысли и слова.",
-                comfort: "Твоя зона силы — личная автономия, запуск уникальных авторских продуктов и роль главного архитектора смыслов."
-            },
-            2: {
-                name: "Аркан 2 — Жрица (Оракул)",
-                plus: "Тонкая эмпатия, дипломатия, видение скрытых мотивов людей и глубокая аналитическая интуиция.",
-                comfort: "Твой ресурс восстанавливается в атмосфере тайны, спокойного созерцания и глубокого консультирования один на один."
-            },
-            3: {
-                name: "Аркан 3 — Императрица",
-                plus: "Природный магнетизм, изобилие, умение выращивать прибыльные проекты и создавать вокруг себя статус и комфорт.",
-                comfort: "Твоя точка опоры — материальный достаток, делегирование быта, эстетика пространства и забота о собственном теле."
-            },
-            4: {
-                name: "Аркан 4 — Император",
-                plus: "Масштабное системное мышление, железная структура, умение выстраивать империи, команды и твердый порядок.",
-                comfort: "Твой ресурс — четкие правила игры, контроль ключевых метрик, стратегическое управление и высокий социальный статус."
-            },
-            5: {
-                name: "Аркан 5 — Иерофант (Учитель)",
-                plus: "Дар структурировать сложные знания в простые системы, авторитетное наставничество и верность твердым принципам.",
-                comfort: "Твоя точка комфорта — передача проверенной методологии ученикам, порядок в документах и уважение к твоему опыту."
-            },
-            6: {
-                name: "Аркан 6 — Влюбленные",
-                plus: "Талант выстраивать горячие коммуникации, безупречный визуальный вкус, создание красоты и притяжение нужных связей.",
-                comfort: "Твой ресурс — работа по любви без принуждения, эстетичное окружение, признание и эмоциональный отклик от аудитории."
-            },
-            7: {
-                name: "Аркан 7 — Колесница (Победитель)",
-                plus: "Стремительная скорость реализации, фокус на большой цели, драйв экспансии и умение вести команду за собой.",
-                comfort: "Твоя точка силы — динамика, смена локаций, четкий маршрут к амбициозной цели и делегирование рутины исполнителям."
-            },
-            8: {
-                name: "Аркан 8 — Справедливость",
-                plus: "Кристальная ясность ума, понимание причинно-следственных законов, честность и талант видеть суть любой системы.",
-                comfort: "Твой ресурс — прозрачные договоренности, юридическая и финансовая чистота, баланс между вкладом и вознаграждением."
-            },
-            9: {
-                name: "Аркан 9 — Отшельник (Мудрец)",
-                plus: "Глубинная интеллектуальная экспертиза, самодостаточность, фундаментальность и верность качеству без суеты.",
-                comfort: "Твоя точка комфорта — личное пространство для глубокой работы, избирательный круг общения и высокий чек за точечный консалтинг."
-            },
-            10: {
-                name: "Аркан 10 — Колесо Фортуны",
-                plus: "Врожденное чутье на выгодные тренды, легкость на подъем, умение оказываться в нужное время в денежном потоке.",
-                comfort: "Твой ресурс — свободный график без тисков жесткого режима, доверие синхрониям и работа на волне вдохновения."
-            },
-            11: {
-                name: "Аркан 11 — Сила",
-                plus: "Колоссальный энергетический аккумулятор, харизма действия, выносливость и способность сдвигать с места тяжелые рынки.",
-                comfort: "Твоя точка опоры — активный сброс напряжения через спорт, большие вызовы и управление процессами без микроменеджмента."
-            },
-            12: {
-                name: "Аркан 12 — Повешенный (Новатор)",
-                plus: "Парадоксальное креативное мышление, способность увидеть гениальное решение под углом, недоступным конкурентам.",
-                comfort: "Твой ресурс — творческая свобода, создание инноваций и жесткое правило работать только по 100% предоплате."
-            },
-            13: {
-                name: "Аркан 13 — Смерть (Трансформатор)",
-                plus: "Бесстрашие перед кризисами, умение быстро отсекать мертвый балласт и перезапускать проекты с кратным ростом.",
-                comfort: "Твоя точка силы — динамичные перемены, антикризисное управление, расчистка старого и запуск смелых реформ."
-            },
-            14: {
-                name: "Аркан 14 — Умеренность (Алхимик)",
-                plus: "Тонкое чувство меры, дипломатичность, соединение несочетаемого, исцеляющее спокойствие и премиальный вкус.",
-                comfort: "Твой ресурс — размеренный ритм без авралов, долгосрочный сложный процент, искусство и гармоничная атмосфера."
-            },
-            15: {
-                name: "Аркан 15 — Дьявол (Искуситель)",
-                plus: "Гипнотическая харизма, рентгеновское видение чужих слабостей и амбиций, магнетизм больших денег и власти.",
-                comfort: "Твоя точка комфорта — масштабные переговоры, премиальный сегмент рынка, роскошь и открытая реализация своих амбиций."
-            },
-            16: {
-                name: "Аркан 16 — Башня (Архитектор)",
-                plus: "Духовное лидерство, способность ломать устаревшие догмы и выстраивать на их месте несокрушимые новые структуры.",
-                comfort: "Твой ресурс — осознанные регулярные обновления в жизни и бизнесе, реинжиниринг систем и внутренняя опора."
-            },
-            17: {
-                name: "Аркан 17 — Звезда",
-                plus: "Яркая неординарность, медийный магнетизм, вдохновение тысяч людей и реализация уникального творческого дара.",
-                comfort: "Твоя точка силы — сцена, публичность, сильный личный бренд и вера в свою исключительную миссию."
-            },
-            18: {
-                name: "Аркан 18 — Луна",
-                plus: "Мощная материализация мыслей, управление образами, глубокая психология и притягательная мистическая интуиция.",
-                comfort: "Твой ресурс — работа с подсознанием, визуалом, дизайном или сторителлингом при опоре на твердые факты."
-            },
-            19: {
-                name: "Аркан 19 — Солнце",
-                plus: "Масштабное общественное лидерство, неугасаемый оптимизм, щедрость и способность обогреть и зарядить огромные команды.",
-                comfort: "Твоя точка комфорта — множество параллельных источников дохода, масштабные проекты, признание и процветание."
-            },
-            20: {
-                name: "Аркан 20 — Страшный Суд",
-                plus: "Глубокая связь с силой рода, системное видение, умение перезапускать семейные сценарии и выходить на новый уровень.",
-                comfort: "Твой ресурс — уважение к корням без слияния с родительскими страхами, создание семейного капитала и масштабных систем."
-            },
-            21: {
-                name: "Аркан 21 — Мир (Космополит)",
-                plus: "Глобальное мышление без границ, легкость масштабирования в онлайне, миротворчество и открытость всему миру.",
-                comfort: "Твоя точка силы — международные проекты, путешествия, цифровая свобода и работа на глобальную аудиторию."
-            },
-            22: {
-                name: "Аркан 22 — Шут (Свободный дух)",
-                plus: "Гениальная спонтанность, отсутствие рамок в голове, легкий старт смелых стартапов и нестандартный прорыв.",
-                comfort: "Твой ресурс — проектная работа с высокой степенью свободы, геймификация бизнеса и надежная финансовая подушка."
-            }
-        };
+      <button class="btn-gold" onclick="proceedToTributePayment()">
+        Забрать полный разбор за 490 ₽ ➡️
+      </button>
+      <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 10px;">
+        Безопасная оплата через официальный сервис Tribute в Telegram — мгновенный доступ после оплаты
+      </p>
+    </div>
+  </div>
 
-        function calculateMatrix() {
-            const val = document.getElementById('birthDate').value;
-            if (!val) return;
-            const parts = val.split('-');
-            const y = parseInt(parts[0], 10);
-            const m = parseInt(parts[1], 10);
-            const d = parseInt(parts[2], 10);
+  <script>
+    // Прямая ссылка на оплату в Tribute
+    const TRIBUTE_PAYMENT_URL = "https://web.tribute.tg/p/K7C";
 
-            const dayArcana = reduceTo22(d);
-            const monthArcana = reduceTo22(m);
-            const yearSum = String(y).split('').reduce((acc, c) => acc + parseInt(c, 10), 0);
-            const yearArcana = reduceTo22(yearSum);
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
 
-            const bottomArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
-            const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana + bottomArcana);
+    // Заполнение селектов даты
+    const daySelect = document.getElementById('birth-day');
+    for (let d = 1; d <= 31; d++) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d < 10 ? '0' + d : d;
+      if (d === 15) opt.selected = true;
+      daySelect.appendChild(opt);
+    }
 
-            const tlArcana = reduceTo22(dayArcana + monthArcana);
-            const trArcana = reduceTo22(monthArcana + yearArcana);
-            const brArcana = reduceTo22(yearArcana + bottomArcana);
-            const blArcana = reduceTo22(bottomArcana + dayArcana);
-            const moneyArcana = reduceTo22(yearArcana + bottomArcana + centerArcana);
+    const yearSelect = document.getElementById('birth-year');
+    for (let y = 2010; y >= 1950; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      if (y === 1998) opt.selected = true;
+      yearSelect.appendChild(opt);
+    }
 
-            document.getElementById('svgDay').textContent = dayArcana;
-            document.getElementById('svgMonth').textContent = monthArcana;
-            document.getElementById('svgYear').textContent = yearArcana;
-            document.getElementById('svgTail').textContent = bottomArcana;
-            document.getElementById('svgCenter').textContent = centerArcana;
-            document.getElementById('svgTL').textContent = tlArcana;
-            document.getElementById('svgTR').textContent = trArcana;
-            document.getElementById('svgBR').textContent = brArcana;
-            document.getElementById('svgBL').textContent = blArcana;
-            document.getElementById('svgMoney').textContent = moneyArcana;
+    // База знаний всех 22 Арканов
+    const ARCANA_DB = {
+      1: {
+        name: "Маг и Первопроходец",
+        plus: "Прирожденный лидер, генератор уникальных идей, способность материализовать мысли и вести за собой.",
+        minus: "Синдром самозванца, неверие в свои силы либо эгоизм, подавление окружающих и страх начать свое дело.",
+        money: "Деньги приходят через личный бренд, уникальное мастерство и свободную деятельность без жестких начальников.",
+        love: "Важно партнерство на равных; в минусе — попытка переделать партнера под себя или уход в холодность."
+      },
+      2: {
+        name: "Верховная Жрица (Тайное знание)",
+        plus: "Мощная интуиция, дипломатия, умение видеть людей насквозь, психологичность и мягкая притягательность.",
+        minus: "Скрытность, сплетни, двойная жизнь, пассивность, тревожность и нежелание брать ответственность.",
+        money: "Финансы идут через психологию, консультирование, медицину, эзотерику и роль «серого кардинала».",
+        love: "В минусе притягиваются тайные романы, любовные треугольники или эмоционально закрытые партнеры."
+      },
+      3: {
+        name: "Императрица (Изобилие и Статус)",
+        plus: "Материальное процветание, женский магнетизм, высокий статус, умение создавать бизнес и уют в легкости.",
+        minus: "Гиперконтроль, попытка «тащить всё на себе», подавление мужчин, зацикленность на быте и деньгах.",
+        money: "Один из самых денежных арканов: деньги идут через красоту, управление, женские ниши и собственный бизнес.",
+        love: "Риск превратиться в «мамочку» для мужчины и притянуть слабого партнера, если не отключить гиперконтроль."
+      },
+      4: {
+        name: "Император (Власть и Структура)",
+        plus: "Железная логика, организаторский талант, финансовая стабильность, умение строить империи и защищать близких.",
+        minus: "Деспотизм, жесткость, трудоголизм на износ, для женщин — «стальные яйца» и конкуренция с мужчинами.",
+        money: "Большие деньги в управлении, системном бизнесе, недвижимости, финансах и руководящих должностях.",
+        love: "Борьба за власть в паре. Чтобы отношения сложились, женщине-4 важно уступать мужчине лидерство дома."
+      },
+      5: {
+        name: "Иерофант (Закон и Наставник)",
+        plus: "Глубокий аналитический ум, дар обучать и систематизировать сложные знания, авторитет и верность традициям.",
+        minus: "Вечный синдром ученика («мне еще рано продавать дорого»), поучение близких, упрямство и жесткие рамки.",
+        money: "Доход через обучение, экспертность, юриспруденцию, IT, консалтинг и передачу проверенных систем.",
+        love: "Крепкий традиционный брак в плюсе; в минусе — придирки к партнеру и попытка воспитывать его по правилам."
+      },
+      6: {
+        name: "Влюбленные (Выбор и Притяжение)",
+        plus: "Невероятное обаяние, вкус к красоте, легкость в коммуникациях, умение выстраивать связи и любить безусловно.",
+        minus: "Зависимость от чужого мнения, идеализация людей с последующим разочарованием, вечные сомнения в выборе.",
+        money: "Деньги приходят только через дело по любви, сферу красоты, дизайна, блога, ивентов и работы с людьми.",
+        love: "Страх одиночества толкает в созависимые связи; урок — полюбить себя без одобрения извне."
+      },
+      7: {
+        name: "Колесница (Прорыв и Триумф)",
+        plus: "Бешеная энергия достижения целей, скорость принятия решений, лидерство, страсть к движению и масштабу.",
+        minus: "Выгорание, суета без результата, хождение по головам, агрессия на тех, кто двигается медленнее.",
+        money: "Финансовый взлет через амбициозные проекты, логистику, продажи, управление командой и переезды.",
+        love: "Отношения как командный проект; в минусе — превращение семьи в поле боя или бегство в работу."
+      },
+      8: {
+        name: "Справедливость (Кармический Баланс)",
+        plus: "Понимание причинно-следственных связей, честность, объективность, умение сохранять хладнокровие в кризисах.",
+        minus: "Хроническая обида на «несправедливый мир», поиск виноватых, судебные тяжбы и наступание на одни и те же грабли.",
+        money: "Белые официальные доходы, госслужба, финансы, аналитика; малейший обман мгновенно бьет по кошельку.",
+        love: "Кармические союзы по расчету или контракту души; обиды разрушают отношения быстрее всего."
+      },
+      9: {
+        name: "Отшельник (Глубинная Мудрость)",
+        plus: "Интеллектуальная глубина, самодостаточность, верность, способность докопаться до сути любой проблемы.",
+        minus: "Замкнутость, уход в себя, экономия на собственных желаниях, страх близости и обесценивание своего труда.",
+        money: "Монетизация узкой глубокой экспертизы, науки, исследований, фриланса и интеллектуальной собственности.",
+        love: "Страх пустить человека в душу; долгие поиски «родственной души» и риск одиночества вдвоем."
+      },
+      10: {
+        name: "Колесо Фортуны (Поток и Удача)",
+        plus: "Умение оказываться в нужное время в нужном месте, легкие деньги в потоке, чутье на выгодные возможности.",
+        minus: "Финансовые качели «то густо, то пусто», пассивность, ожидание чуда или выбор чужого тяжелого графика.",
+        money: "Запрет на каторжный труд! Деньги идут через фриланс, инвестиции, проектные сделки и доверие интуиции.",
+        love: "Судьбоносные встречи; в минусе — застревание в цикличных отношениях (сходимся-расходимся)."
+      },
+      11: {
+        name: "Сила (Потенциал и Страсть)",
+        plus: "Колоссальная работоспособность, выносливость, сексуальный магнетизм, умение свернуть горы за короткий срок.",
+        minus: "Разрушительный трудоголизм, давление на близких, вспышки гнева, износ тела и психосоматические боли.",
+        money: "Большие чеки в бизнесе, спорте, энергетических практиках и проектах, требующих высокой отдачи.",
+        love: "Яркая страсть; в минусе — подавление партнера силой характера и неспособность проявлять слабость."
+      },
+      12: {
+        name: "Повешенный (Иное Видение и Служение)",
+        plus: "Креативный нестандартный ум, эмпатия, новаторство, способность находить гениальные решения там, где другие слепы.",
+        minus: "Синдром жертвы, неумение сказать «нет», работа за копейки из жалости, зависание в мертвых ситуациях.",
+        money: "Блок: стыдно называть высокую цену. Деньги открываются через творчество, психологию и благотворительность из изобилия.",
+        love: "Спасательство проблемных партнеров (абьюзеров, зависимых); необходимо выйти из роли жертвы."
+      },
+      13: {
+        name: "Смерть (Тотальная Трансформация)",
+        plus: "Бесстрашие в кризисах, умение быстро отсекать лишнее, запускать перемены и вытаскивать проекты со дна.",
+        minus: "Панический страх перемен, цепляние за прошлое, резкость, разрушение отношений и планов на ровном месте.",
+        money: "Антикризисное управление, медицина, хирургия, реформы, экстремальные и быстроменяющиеся ниши.",
+        love: "Отношения проходят через жесткие кризисы обновления; без развития союз резко обрывается."
+      },
+      14: {
+        name: "Умеренность (Искусство и Исцеление)",
+        plus: "Тонкий эстетический вкус, гармония, дипломатичность, контакт с душой и исцеляющее влияние на людей.",
+        minus: "Эмоциональные качели, крайности, зависимости, нетерпеливость («хочу всё и сразу») и творческий застой.",
+        money: "Искусство, парфюмерия, медицина, психология, дипломатия; деньги приходят спокойно и без надрыва.",
+        love: "Глубокая душевная связь; в минусе — капризность, обидчивость и эмоциональная холодность."
+      },
+      15: {
+        name: "Дьявол (Искушение, Магнетизм и Большие Деньги)",
+        plus: "Мощнейшая харизма, рентгеновское видение человеческих слабостей, притяжение роскоши, власти и сверхдоходов.",
+        minus: "Токсичные зависимости, ревность, манипуляции, жажда легких денег, кредитные ловушки и абьюзивные связи.",
+        money: "Сверхприбыли в шоу-бизнесе, продажах, элитных товарах, инвестициях и продюсировании.",
+        love: "Роковая страсть, одержимость партнером, проверки на ревность и измены при уходе энергии в минус."
+      },
+      16: {
+        name: "Башня (Духовное Пробуждение и Революция)",
+        plus: "Мощный энергетический стержень, способность разрушать старые рамки и строить новую жизнь с нуля еще сильнее.",
+        minus: "Внезапные крахи, потери денег, травмы, вспышки разрушительного гнева и зацепки за материальную стабильность.",
+        money: "Строительство, недвижимость, коучинг, духовное лидерство, стартапы и реконструкция бизнеса.",
+        love: "Отношения-вспышка, которые либо полностью меняют мировоззрение обоих, либо рушатся до основания."
+      },
+      17: {
+        name: "Звезда (Яркость, Талант и Признание)",
+        plus: "Неординарный талант, медийность, вдохновение для тысяч людей, чистая интуиция и звездная харизма.",
+        minus: "Серость («синдром невидимки»), страх публичности и критики, либо звездная болезнь и оторванность от реальности.",
+        money: "Деньги идут через сцену, личный блог, дизайн, астрологию, творчество и публичную известность.",
+        love: "Высокие требования к партнеру; важно восхищаться друг другом, иначе наступает охлаждение."
+      },
+      18: {
+        name: "Луна (Магия Подсознания и Материализация)",
+        plus: "Прямая связь с подсознанием: всё, о чем вы ярко думаете (и хорошее, и плохое), мгновенно воплощается в реальности.",
+        minus: "Фобии, накручивание худших сценариев, депрессии, жизнь в иллюзиях, самообман и притяжение лжи.",
+        money: "Психология, кино, фото, дизайн, эзотерика, литература; страх безденежья буквально блокирует ваш счет.",
+        love: "Мистическое притяжение, но в минусе — подозрительность, скрытые тайны и страх близости."
+      },
+      19: {
+        name: "Солнце (Процветание, Масштаб и Щедрость)",
+        plus: "Мощнейший денежный и лидерский потенциал, оптимизм, масштабные проекты, умение светить для огромной аудитории.",
+        minus: "Выгорание, самоедство, жадность или страх больших денег; когда энергия зажата — она выжигает вас изнутри.",
+        money: "Крупный бизнес, политика, меценатство, публичное руководство. Деньги приходят на масштабные цели и щедрость.",
+        love: "Щедрая счастливая семья, много тепла; в минусе — выжигающий контроль и требование постоянного внимания."
+      },
+      20: {
+        name: "Суд (Сила Рода и Яснознание)",
+        plus: "Мощная поддержка предков, дар исцелять родовые сценарии, глобальное мышление и выход на новый уровень семьи.",
+        minus: "Обиды на родителей, осуждение родственников, повторение худших ошибок семьи (безденежье, разводы).",
+        money: "Семейный бизнес, медицина, работа с информацией, международные корпорации; прощение родителей открывает финансы.",
+        love: "Глубокая связь с родом партнера; конфликты с родителями мгновенно бьют по личным отношениям."
+      },
+      21: {
+        name: "Мир (Глобальный Масштаб и Свобода)",
+        plus: "Отсутствие границ в голове, миротворчество, успех за рубежом, масштабные интернет-проекты и свобода мышления.",
+        minus: "Ограничивающие убеждения («это невозможно»), страх перемен, кредитные долги и жизнь в тесной клетке.",
+        money: "IT, международная торговля, путешествия, фриланс на весь мир, глобальные онлайн-платформы.",
+        love: "Союз без границ и ревности, возможен брак с иностранцем или переезд благодаря партнеру."
+      },
+      22: {
+        name: "Шут (Высшая Свобода и Обнуление)",
+        plus: "Гениальная легкость, отсутствие привязок, способность начинать с нуля в любой точке мира, доверие Вселенной.",
+        minus: "Безответственность, хаос в деньгах, зависимости, либо наоборот — попадание в жесткие рамки, долги и «золотую клетку».",
+        money: "Творчество, путешествия, развлечения, инвестиции, свободный график; жесткий офис убивает ваш денежный поток.",
+        love: "Легкие вдохновляющие отношения без давления; малейшая попытка посадить на цепь разрушает союз."
+      }
+    };
 
-            document.getElementById('matrixVisual').style.display = 'block';
+    // Сведение любого числа к 22 Арканам
+    function reduceArcana(num) {
+      let n = Math.abs(parseInt(num, 10)) || 22;
+      while (n > 22) {
+        n = String(n).split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+      }
+      return n === 0 ? 22 : n;
+    }
 
-            const dayData = arcanaData[dayArcana];
-            const monthData = arcanaData[monthArcana];
-            const centerData = arcanaData[centerArcana];
+    function sumDigits(num) {
+      return String(num).split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
+    }
 
-            document.getElementById('dayArcanaName').textContent = dayData.name;
-            document.getElementById('dayArcanaDesc').textContent = dayData.plus;
+    let currentMatrix = null;
 
-            document.getElementById('monthArcanaName').textContent = monthData.name;
-            document.getElementById('monthArcanaDesc').textContent = monthData.plus;
+    function startCalculation() {
+      const day = parseInt(document.getElementById('birth-day').value, 10);
+      const month = parseInt(document.getElementById('birth-month').value, 10);
+      const year = parseInt(document.getElementById('birth-year').value, 10);
 
-            document.getElementById('centerArcanaName').textContent = centerData.name;
-            document.getElementById('centerArcanaDesc').textContent = centerData.comfort;
+      document.getElementById('input-screen').style.display = 'none';
+      const loader = document.getElementById('loader-screen');
+      loader.style.display = 'block';
 
-            document.getElementById('tailArcanaPreview').textContent = "Теневой узел: Аркан " + bottomArcana + " и канал денег " + moneyArcana;
-            document.getElementById('lockNodeTitle').textContent = "Узел (Аркан " + bottomArcana + ") заблокирован";
+      setTimeout(() => {
+        document.getElementById('loader-title').textContent = 'Анализ Кармического Хвоста...';
+        document.getElementById('loader-sub').textContent = 'Проверка финансового канала и блокировок рода';
+      }, 900);
 
-            document.getElementById('matrixDisplay').style.display = 'block';
-        }
+      setTimeout(() => {
+        loader.style.display = 'none';
+        buildAndRenderMatrix(day, month, year);
+      }, 1900);
+    }
 
-        function calculatePair() {
-            const d1 = document.getElementById('pairDate1').value;
-            const d2 = document.getElementById('pairDate2').value;
-            if (!d1 || !d2) return;
+    function buildAndRenderMatrix(day, month, year) {
+      // 1. Базовые вершины Личного Квадрата
+      const A = reduceArcana(day); // 0 лет (Портрет)
+      const B = reduceArcana(month); // 20 лет (Таланты / Небо)
+      const C = reduceArcana(sumDigits(year)); // 40 лет (Деньги / Земля)
+      const D = reduceArcana(A + B + C); // 60 лет (Кармический долг)
+      const E = reduceArcana(A + B + C + D); // Центр (Зона комфорта)
 
-            let hash = 0;
-            (d1 + d2).split('').forEach(c => hash += c.charCodeAt(0));
-            const percent = 72 + (hash % 25);
+      // 2. Вершины Родового Квадрата (Диагонали)
+      const F = reduceArcana(A + B); // Верх-лево (Мужской род - дух)
+      const G = reduceArcana(B + C); // Верх-право (Женский род - дух)
+      const H = reduceArcana(C + D); // Низ-право (Мужской род - материя)
+      const I = reduceArcana(D + A); // Низ-лево (Женский род - материя)
 
-            const p1 = d1.split('-');
-            const p2 = d2.split('-');
-            const a1 = reduceTo22(parseInt(p1[2], 10));
-            const a2 = reduceTo22(parseInt(p2[2], 10));
-            const unionArcana = reduceTo22(a1 + a2);
+      // 3. Внутренние круги по главным осям
+      const A1 = reduceArcana(A + E);
+      const A2 = reduceArcana(A + A1);
 
-            const unionData = arcanaData[unionArcana];
-            document.getElementById('pairPercent').textContent = percent + '%';
-            document.getElementById('pairUnionTitle').textContent = "Код пары: " + unionData.name;
-            document.getElementById('pairUnionDesc').textContent = "В плюсе ваш союз дает: " + unionData.plus.toLowerCase();
+      const B1 = reduceArcana(B + E);
+      const B2 = reduceArcana(B + B1);
 
-            document.getElementById('pairDisplay').style.display = 'block';
-        }
+      const C1 = reduceArcana(C + E);
+      const C2 = reduceArcana(C + C1);
 
-        function calculateIdeal() {
-            const val = document.getElementById('idealBirthDate').value;
-            if (!val) return;
-            const parts = val.split('-');
-            const y = parseInt(parts[0], 10);
-            const m = parseInt(parts[1], 10);
-            const d = parseInt(parts[2], 10);
+      // Кармический хвост (внизу)
+      const K1 = reduceArcana(D + E);
+      const K2 = reduceArcana(D + K1);
 
-            const dayArcana = reduceTo22(d);
-            const monthArcana = reduceTo22(m);
-            const yearSum = String(y).split('').reduce((acc, c) => acc + parseInt(c, 10), 0);
-            const yearArcana = reduceTo22(yearSum);
-            const centerArcana = reduceTo22(dayArcana + monthArcana + yearArcana);
+      // 4. Внутренние точки Рода
+      const F1 = reduceArcana(F + E);
+      const G1 = reduceArcana(G + E);
+      const H1 = reduceArcana(H + E);
+      const I1 = reduceArcana(I + E);
 
-            // Вычисляем 3 комплементарные даты для пользователя
-            const match1 = reduceTo22(centerArcana + 3);
-            const match2 = reduceTo22(dayArcana + 7);
-            const match3 = reduceTo22(monthArcana + 11);
+      // 5. Канал Денег и Отношений (между K1 и C1)
+      const ML = reduceArcana(K1 + C1); // Стык денег и любви
+      const L_node = reduceArcana(K1 + ML); // Вход в Отношения
+      const M_node = reduceArcana(C1 + ML); // Вход в Деньги
 
-            const partnerArcana = arcanaData[match1];
+      // 6. Предназначения
+      const skyLine = reduceArcana(B + D);
+      const earthLine = reduceArcana(A + C);
+      const personalPurpose = reduceArcana(skyLine + earthLine);
 
-            document.getElementById('idealTitle').textContent = "Твой резонанс: " + partnerArcana.name;
-            document.getElementById('idealDesc').textContent = "Для твоей матрицы (Код " + dayArcana + ") максимальную синергию в деньгах и любви дают партнеры, рожденные в эти числа любого месяца:";
+      const dateFormatted = `${day < 10 ? '0'+day : day}.${month < 10 ? '0'+month : month}.${year}`;
 
-            document.getElementById('idealPill1').textContent = match1 + " число";
-            document.getElementById('idealPill2').textContent = match2 + " число";
-            document.getElementById('idealPill3').textContent = match3 + " число";
+      currentMatrix = {
+        dateFormatted,
+        A, B, C, D, E, F, G, H, I,
+        A1, A2, B1, B2, C1, C2, K1, K2,
+        F1, G1, H1, I1, ML, L_node, M_node,
+        personalPurpose
+      };
 
-            document.getElementById('idealDisplay').style.display = 'block';
-        }
-    </script>
+      document.getElementById('display-date').textContent = dateFormatted;
+      document.getElementById('modal-date-str').textContent = dateFormatted;
+      document.getElementById('modal-money-code').textContent = `${C1} - ${M_node} - ${C}`;
+      document.getElementById('modal-love-code').textContent = `${K1} - ${L_node} - ${ML}`;
+      document.getElementById('modal-karma-code').textContent = `${K1} - ${K2} - ${D}`;
+
+      renderSVGMatrix(currentMatrix);
+      populateTextCards(currentMatrix);
+
+      document.getElementById('result-screen').style.display = 'block';
+      document.getElementById('sticky-paybar').style.display = 'block';
+
+      // Выбираем по умолчанию узел Кармического Хвоста
+      inspectNode('D');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderSVGMatrix(m) {
+      const svg = `
+      <svg viewBox="0 0 500 500" width="100%" height="auto" style="max-height: 410px; display: block; margin: 0 auto;">
+        <defs>
+          <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(212, 175, 55, 0.32)" />
+            <stop offset="100%" stop-color="rgba(212, 175, 55, 0)" />
+          </radialGradient>
+          <filter id="softGlow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Фоновое свечение центра -->
+        <circle cx="250" cy="250" r="195" fill="url(#centerGlow)" />
+
+        <!-- Внешнее возрастное кольцо -->
+        <circle cx="250" cy="250" r="192" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1" stroke-dasharray="4 4" />
+        <circle cx="250" cy="250" r="130" fill="none" stroke="rgba(212,175,55,0.12)" stroke-width="1" />
+
+        <!-- ЛИЧНЫЙ КВАДРАТ (Прямой ромб A-B-C-D) -->
+        <polygon points="60,250 250,60 440,250 250,440" fill="rgba(212,175,55,0.03)" stroke="#d4af37" stroke-width="1.8" stroke-opacity="0.65" />
+
+        <!-- РОДОВОЙ КВАДРАТ (Диагональный квадрат F-G-H-I) -->
+        <polygon points="116,116 384,116 384,384 116,384" fill="rgba(160,120,255,0.02)" stroke="#b892ff" stroke-width="1.5" stroke-opacity="0.5" />
+
+        <!-- ОСИ НЕБА И ЗЕМЛИ -->
+        <line x1="250" y1="60" x2="250" y2="440" stroke="#d4af37" stroke-width="1.8" stroke-opacity="0.55" />
+        <line x1="60" y1="250" x2="440" y2="250" stroke="#d4af37" stroke-width="1.8" stroke-opacity="0.55" />
+
+        <!-- ЛИНИИ МУЖСКОГО И ЖЕНСКОГО РОДА -->
+        <line x1="116" y1="116" x2="384" y2="384" stroke="#b892ff" stroke-width="1.4" stroke-dasharray="5 3" stroke-opacity="0.5" />
+        <line x1="384" y1="116" x2="116" y2="384" stroke="#ff8fa3" stroke-width="1.4" stroke-dasharray="5 3" stroke-opacity="0.5" />
+
+        <!-- ВЫДЕЛЕННЫЙ КАРМИЧЕСКИЙ ХВОСТ (Низ) -->
+        <line x1="250" y1="250" x2="250" y2="440" stroke="#e63946" stroke-width="4" stroke-opacity="0.75" />
+
+        <!-- КАНАЛ ДЕНЕГ И ОТНОШЕНИЙ (Диагональ K1 -> C1) -->
+        <line x1="250" y1="330" x2="290" y2="290" stroke="#ff5d8f" stroke-width="3" filter="url(#softGlow)" />
+        <line x1="290" y1="290" x2="330" y2="250" stroke="#2ec4b6" stroke-width="3" filter="url(#softGlow)" />
+
+        <!-- МИКРО-ПОДПИСИ ВОЗРАСТА И ОСЕЙ -->
+        <text x="35" y="232" fill="#9a9aa6" font-size="9" text-anchor="middle">0 лет</text>
+        <text x="250" y="32" fill="#9a9aa6" font-size="9" text-anchor="middle">20 лет • Таланты</text>
+        <text x="466" y="232" fill="#9a9aa6" font-size="9" text-anchor="middle">40 лет</text>
+        <text x="250" y="476" fill="#ff758f" font-size="10" font-weight="bold" text-anchor="middle">60 лет • КАРМИЧЕСКИЙ ХВОСТ</text>
+
+        <text x="116" y="92" fill="#b892ff" font-size="9" text-anchor="middle">Род Отца</text>
+        <text x="384" y="92" fill="#ff8fa3" font-size="9" text-anchor="middle">Род Матери</text>
+
+        <!-- Иконки Денег и Любви на линии -->
+        <text x="328" y="284" font-size="12" text-anchor="middle">💰</text>
+        <text x="276" y="334" font-size="11" text-anchor="middle">❤️</text>
+
+        <!-- УЗЛЫ МАТРИЦЫ -->
+        ${renderNodeSVG('A', 60, 250, 20, m.A, '#111', '#d4af37', '#fff', false)}
+        ${renderNodeSVG('A2', 112, 250, 13, m.A2, '#14141d', '#d4af37', '#f3e5ab', false)}
+        ${renderNodeSVG('A1', 165, 250, 14, m.A1, '#14141d', '#d4af37', '#f3e5ab', false)}
+
+        ${renderNodeSVG('B', 250, 60, 20, m.B, '#111', '#d4af37', '#fff', false)}
+        ${renderNodeSVG('B2', 250, 112, 13, m.B2, '#14141d', '#d4af37', '#f3e5ab', true)}
+        ${renderNodeSVG('B1', 250, 165, 14, m.B1, '#14141d', '#d4af37', '#f3e5ab', true)}
+
+        <!-- ПРАВАЯ ОСЬ (ДЕНЬГИ И ЗЕМЛЯ - ПЛАТНО) -->
+        ${renderNodeSVG('C', 440, 250, 20, m.C, '#10211f', '#2ec4b6', '#2ec4b6', true)}
+        ${renderNodeSVG('C2', 388, 250, 13, m.C2, '#10211f', '#2ec4b6', '#a8f0e8', true)}
+        ${renderNodeSVG('C1', 330, 250, 15, m.C1, '#10211f', '#2ec4b6', '#2ec4b6', true)}
+
+        <!-- НИЖНЯЯ ОСЬ (КАРМИЧЕСКИЙ ХВОСТ - ОТКРЫТО) -->
+        ${renderNodeSVG('D', 250, 440, 20, m.D, '#2b0d12', '#e63946', '#ffccd5', false)}
+        ${renderNodeSVG('K2', 250, 386, 14, m.K2, '#2b0d12', '#e63946', '#ffccd5', false)}
+        ${renderNodeSVG('K1', 250, 330, 15, m.K1, '#2b0d12', '#e63946', '#ffccd5', false)}
+
+        <!-- УЗЛЫ НА ЛИНИИ ДЕНЕГ И ЛЮБВИ (ПЛАТНО) -->
+        ${renderNodeSVG('ML', 290, 290, 13, m.ML, '#211321', '#d4af37', '#f3e5ab', true)}
+        ${renderNodeSVG('M_node', 312, 268, 11, m.M_node, '#0d2624', '#2ec4b6', '#2ec4b6', true)}
+        ${renderNodeSVG('L_node', 268, 312, 11, m.L_node, '#2b111c', '#ff5d8f', '#ff8fa3', true)}
+
+        <!-- РОДОВЫЕ ВЕРШИНЫ -->
+        ${renderNodeSVG('F', 116, 116, 17, m.F, '#171324', '#b892ff', '#e0c3fc', true)}
+        ${renderNodeSVG('G', 384, 116, 17, m.G, '#24131c', '#ff8fa3', '#ffccd5', true)}
+        ${renderNodeSVG('H', 384, 384, 17, m.H, '#171324', '#b892ff', '#e0c3fc', true)}
+        ${renderNodeSVG('I', 116, 384, 17, m.I, '#24131c', '#ff8fa3', '#ffccd5', true)}
+
+        ${renderNodeSVG('F1', 162, 162, 12, m.F1, '#14141d', '#b892ff', '#d0bfff', true)}
+        ${renderNodeSVG('G1', 338, 162, 12, m.G1, '#14141d', '#ff8fa3', '#ffccd5', true)}
+        ${renderNodeSVG('H1', 342, 342, 12, m.H1, '#14141d', '#b892ff', '#d0bfff', true)}
+        ${renderNodeSVG('I1', 162, 338, 12, m.I1, '#14141d', '#ff8fa3', '#ffccd5', true)}
+
+        <!-- ЦЕНТР МАТРИЦЫ (ЗОНА КОМФОРТА) -->
+        ${renderNodeSVG('E', 250, 250, 26, m.E, '#261e0a', '#ffd700', '#ffd700', false)}
+      </svg>`;
+
+      document.getElementById('svg-matrix-holder').innerHTML = svg;
+    }
+
+    function renderNodeSVG(id, cx, cy, r, num, fill, stroke, textColor, isLocked) {
+      const fontSize = r >= 22 ? 16 : (r >= 16 ? 13 : 10);
+      return `
+        <g class="svg-node" id="node-${id}" onclick="inspectNode('${id}')">
+          <circle class="main-circle" cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2" />
+          <text x="${cx}" y="${cy}" fill="${textColor}" font-size="${fontSize}" font-weight="bold" text-anchor="middle" dominant-baseline="central">${num}</text>
+          ${isLocked && r >= 15 ? `<circle cx="${cx + r*0.7}" cy="${cy - r*0.7}" r="7" fill="#09090d" stroke="${stroke}" stroke-width="1"/><text x="${cx + r*0.7}" y="${cy - r*0.7}" font-size="8" text-anchor="middle" dominant-baseline="central">🔒</text>` : ''}
+        </g>
+      `;
+    }
+
+    // При клике на любой кружок Матрицы
+    function inspectNode(nodeId) {
+      if (!currentMatrix) return;
+      document.querySelectorAll('.svg-node').forEach(el => el.classList.remove('node-selected'));
+      const activeEl = document.getElementById('node-' + nodeId);
+      if (activeEl) activeEl.classList.add('node-selected');
+
+      const m = currentMatrix;
+      const zoneEl = document.getElementById('insp-zone');
+      const tagEl = document.getElementById('insp-tag');
+      const titleEl = document.getElementById('insp-title');
+      const descEl = document.getElementById('insp-desc');
+
+      const nodeMap = {
+        A: { num: m.A, zone: 'Визитная карточка (0 лет)', free: true, mode: 'plus' },
+        A1: { num: m.A1, zone: 'Проявление в социуме', free: true, mode: 'plus' },
+        A2: { num: m.A2, zone: 'Талант коммуникации', free: true, mode: 'plus' },
+        B: { num: m.B, zone: 'Связь с Ангелом-Хранителем (20 лет)', free: true, mode: 'plus' },
+        E: { num: m.E, zone: 'Центр Матрицы • Точка Душевного Комфорта', free: true, mode: 'plus' },
+        D: { num: m.D, zone: 'Кармический Долг Прошлой Жизни (60 лет)', free: true, mode: 'minus' },
+        K1: { num: m.K1, zone: 'Вершина Кармического Хвоста', free: true, mode: 'minus' },
+        K2: { num: m.K2, zone: 'Скрытый Узел Кармического Хвоста', free: true, mode: 'minus' },
+        C: { num: m.C, zone: 'Финансовый Блок и Карма Денег (40 лет)', free: false, mode: 'money' },
+        C1: { num: m.C1, zone: 'Вход в Денежный Канал 💰', free: false, mode: 'money' },
+        C2: { num: m.C2, zone: 'Энергия Масштаба Дохода 💰', free: false, mode: 'money' },
+        M_node: { num: m.M_node, zone: 'Код Денежной Профессии 💰', free: false, mode: 'money' },
+        ML: { num: m.ML, zone: 'Баланс Денег и Любви', free: false, mode: 'money' },
+        L_node: { num: m.L_node, zone: 'Вход в Канал Отношений ❤️', free: false, mode: 'love' },
+        B1: { num: m.B1, zone: 'Духовный Дар (Чакра Аджна)', free: false, mode: 'plus' },
+        B2: { num: m.B2, zone: 'Код Высшего Таланта', free: false, mode: 'plus' },
+        F: { num: m.F, zone: 'Духовная программа Рода Отца', free: false, mode: 'minus' },
+        G: { num: m.G, zone: 'Духовная программа Рода Матери', free: false, mode: 'minus' },
+        H: { num: m.H, zone: 'Материальная карма Рода Отца', free: false, mode: 'money' },
+        I: { num: m.I, zone: 'Материальная карма Рода Матери', free: false, mode: 'love' },
+        F1: { num: m.F1, zone: 'Сила Рода Отца', free: false, mode: 'plus' },
+        G1: { num: m.G1, zone: 'Сила Рода Матери', free: false, mode: 'plus' },
+        H1: { num: m.H1, zone: 'Родовой денежный узел', free: false, mode: 'money' },
+        I1: { num: m.I1, zone: 'Родовой сценарий в любви', free: false, mode: 'love' }
+      };
+
+      const info = nodeMap[nodeId] || { num: m.E, zone: 'Узел Матрицы', free: true, mode: 'plus' };
+      const arcana = ARCANA_DB[info.num];
+
+      zoneEl.textContent = info.zone;
+
+      if (info.free) {
+        tagEl.className = 'inspector-tag tag-free';
+        tagEl.textContent = 'ОТКРЫТО';
+        titleEl.textContent = `${info.num} Аркан — ${arcana.name}`;
+        descEl.innerHTML = info.mode === 'minus'
+          ? `<strong style="color:#ff8fa3;">В теневом проявлении (минус):</strong> ${arcana.minus}`
+          : `<strong style="color:#f3e5ab;">В плюсе:</strong> ${arcana.plus}<br><span style="color:#9a9aa6; font-size:12.5px;"><strong>Риск ухода в минус:</strong> ${arcana.minus}</span>`;
+      } else {
+        tagEl.className = 'inspector-tag tag-locked';
+        tagEl.textContent = 'ЗАКРЫТО 🔒';
+        titleEl.textContent = `${info.num} Аркан — ${arcana.name} (Заблокировано)`;
+        const preview = info.mode === 'money' ? arcana.money : (info.mode === 'love' ? arcana.love : arcana.minus);
+        descEl.innerHTML = `
+          <span>В этой точке у вас стоит <strong>${info.num} Аркан</strong>. ${preview.slice(0, 72)}...</span>
+          <div style="margin-top:8px;">
+            <button class="btn-unlock-inline" onclick="openPayModal()">🔓 Открыть полную расшифровку узла за 490 ₽</button>
+          </div>
+        `;
+      }
+    }
+
+    function populateTextCards(m) {
+      const arcA = ARCANA_DB[m.A];
+      const arcE = ARCANA_DB[m.E];
+      const arcD = ARCANA_DB[m.D];
+      const arcC = ARCANA_DB[m.C];
+      const arcL = ARCANA_DB[m.L_node];
+
+      document.getElementById('pill-portrait').textContent = `${m.A} Аркан`;
+      document.getElementById('body-portrait').innerHTML = `
+        <strong>${arcA.name}.</strong> ${arcA.plus}<br><br>
+        <span style="color:#ff8fa3;"><strong>Когда энергия падает в минус:</strong></span> ${arcA.minus}
+      `;
+
+      document.getElementById('pill-center').textContent = `${m.E} Аркан`;
+      document.getElementById('body-center').innerHTML = `
+        Ваша центральная точка силы — <strong>${arcE.name}</strong>. ${arcE.plus} Если этот центр заблокирован, вы теряете энергию и сталкиваетесь с апатией: ${arcE.minus.toLowerCase()}
+      `;
+
+      document.getElementById('pill-karma').textContent = `Код ${m.K1}-${m.K2}-${m.D}`;
+      document.getElementById('body-karma').innerHTML = `
+        В основе вашего кармического хвоста лежит <strong>${m.D} Аркан (${arcD.name})</strong> в связке с энергиями <strong>${m.K1}</strong> и <strong>${m.K2}</strong>. В этой жизни он проверяет вас через уязвимую точку: <em>${arcD.minus.toLowerCase()}</em> Пока этот узел не выведен в плюс, он автоматически оттягивает энергию из денежного канала.
+      `;
+
+      document.getElementById('pill-money').textContent = `Код ${m.C1}-${m.M_node}-${m.C} 🔒`;
+      document.getElementById('teaser-money').textContent = `Ваш денежный канал открывается через ${m.C1} и ${m.C} Арканы (${arcC.name}). Узнайте, какое действие блокирует ваш доход:`;
+
+      document.getElementById('pill-love').textContent = `Код ${m.K1}-${m.L_node}-${m.ML} 🔒`;
+      document.getElementById('teaser-love').textContent = `На входе в отношения стоит ${m.L_node} Аркан (${arcL.name}). Вот почему в вашей жизни повторяются одни и те же сценарии:`;
+
+      document.getElementById('pill-rod').textContent = `Личное число: ${m.personalPurpose} 🔒`;
+      document.getElementById('teaser-rod').textContent = `Код вашего предназначения — ${m.personalPurpose} Аркан, родовые узлы: ${m.F}, ${m.G}, ${m.H}, ${m.I}.`;
+    }
+
+    function resetApp() {
+      document.getElementById('result-screen').style.display = 'none';
+      document.getElementById('sticky-paybar').style.display = 'none';
+      document.getElementById('input-screen').style.display = 'block';
+    }
+
+    // Таймер и модальное окно
+    let timerInterval = null;
+    function openPayModal() {
+      document.getElementById('pay-modal').style.display = 'flex';
+      if (!timerInterval) {
+        let sec = 14 * 60 + 59;
+        timerInterval = setInterval(() => {
+          sec = sec > 0 ? sec - 1 : 899;
+          const m = Math.floor(sec / 60);
+          const s = sec % 60;
+          document.getElementById('countdown').textContent = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        }, 1000);
+      }
+    }
+
+    function closePayModal() {
+      document.getElementById('pay-modal').style.display = 'none';
+    }
+
+    // Переход на страницу оплаты Tribute
+    function proceedToTributePayment() {
+      if (tg && typeof tg.openLink === 'function') {
+        tg.openLink(TRIBUTE_PAYMENT_URL);
+      } else {
+        window.location.href = TRIBUTE_PAYMENT_URL;
+      }
+    }
+  </script>
 </body>
 </html>
